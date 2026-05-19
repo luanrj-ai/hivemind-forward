@@ -1,3 +1,16 @@
+---
+title: AI Trading Sim
+emoji: 📈
+colorFrom: blue
+colorTo: indigo
+sdk: streamlit
+sdk_version: 1.57.0
+app_file: toy_v06/viz_app_sim.py
+pinned: false
+license: mit
+short_description: Trade AAPL for 32 days against 11 AI agents. Beat them.
+---
+
 # Stock Sim — You vs 11 AI Agents
 
 A trading simulator where you go head-to-head against 11 LLM-driven agents (a hedge-fund PM, an activist short seller, a Cathie-Wood-style influencer, a CTA, retail FOMO, three economists, and more) trading AAPL over 32 days.
