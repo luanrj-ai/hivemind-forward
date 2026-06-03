@@ -107,7 +107,9 @@ def predict_today(date: str | None, tickers: list[str], agents: int,
         print(f"\n  {tkr} @ {as_of} (close ${ctx['t0_close']}, "
               f"{len(ctx['news_headlines'])} headlines) — {len(personas)} agents")
         views = think_population(personas, ctx, model=model)
-        fc = aggregate.aggregate(views, personas, edges, target_horizon=horizon)
+        daily_vol = (ctx["indicators"].get("ann_vol_pct") or 0) / (252 ** 0.5)
+        fc = aggregate.aggregate(views, personas, edges, target_horizon=horizon,
+                                 daily_vol_pct=daily_vol)
 
         # Quota guard: if too many agents abstained (claude window exhausted),
         # this isn't a real forecast — skip it (don't pollute pending/scoreboard).

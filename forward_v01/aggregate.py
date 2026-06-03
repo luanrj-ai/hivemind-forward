@@ -69,7 +69,8 @@ def social_propagate(views: list[dict], personas: list[dict], edges: dict,
 
 # ── aggregation ──────────────────────────────────────────────────────────────
 def aggregate(views: list[dict], personas: list[dict], edges: dict,
-              target_horizon: int = 1, social_rounds: int | None = None) -> dict:
+              target_horizon: int = 1, social_rounds: int | None = None,
+              daily_vol_pct: float | None = None) -> dict:
     by_pid = {p["pid"]: p for p in personas}
     active = [v for v in views if not v.get("abstained")]
     n_abstain = len(views) - len(active)
@@ -105,8 +106,16 @@ def aggregate(views: list[dict], personas: list[dict], edges: dict,
     dispersion = math.sqrt(var)
 
     exp_pct = signal * RETURN_PER_SIGNAL_PER_DAY * target_horizon * 100
-    ci_half = 1.96 * dispersion * RETURN_PER_SIGNAL_PER_DAY * target_horizon * 100
-    ci_half = max(ci_half, target_horizon * 0.5)  # floor so CI never collapses
+
+    # 95% CI for the next-h-day move. The dominant source of uncertainty is the
+    # stock's own realized volatility, NOT how much the agents disagree — so when
+    # we know daily vol, set the band from it (scales with sqrt(time)). Opinion
+    # dispersion only matters as a small fallback when vol is unavailable.
+    if daily_vol_pct and daily_vol_pct > 0:
+        ci_half = 1.96 * daily_vol_pct * math.sqrt(target_horizon)
+    else:
+        ci_half = max(1.96 * dispersion * RETURN_PER_SIGNAL_PER_DAY * target_horizon * 100,
+                      target_horizon * 0.5)
 
     lean = "long" if signal > 0.08 else "short" if signal < -0.08 else "neutral"
 
@@ -123,6 +132,7 @@ def aggregate(views: list[dict], personas: list[dict], edges: dict,
         "consensus_lean": lean,
         "consensus_strength": round(min(1.0, abs(signal)), 3),
         "dispersion": round(dispersion, 4),
+        "daily_vol_pct": round(daily_vol_pct, 3) if daily_vol_pct else None,
         "signal": round(signal, 4),
         "n_votes": len(active),
         "n_long": counts["long"], "n_short": counts["short"],
