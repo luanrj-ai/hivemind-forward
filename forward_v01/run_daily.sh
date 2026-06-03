@@ -27,8 +27,9 @@ LOG="forward_v01/results/logs/run_$(date +%Y%m%d_%H%M).log"
   "$REPO/.venv/bin/python" -m forward_v01.scoreboard --json
 
   echo "--- commit & push results ---"
-  git add forward_v01/results/pending.jsonl forward_v01/results/scored.jsonl \
-          forward_v01/results/scoreboard.json 2>/dev/null
+  # Add the whole results dir (logs are *.log → gitignored). Adding specific
+  # files breaks when some don't exist yet (scored/scoreboard before any score).
+  git add forward_v01/results/
   if git diff --cached --quiet; then
     echo "nothing to commit"
   else

@@ -31,6 +31,8 @@ SCORED = RESULTS / "scored.jsonl"
 
 DEFAULT_TICKERS = ["AAPL", "MSFT", "NVDA", "GOOGL", "AMZN"]
 DEADBAND = 0.10  # % move below which we call it "flat" for direction scoring
+MIN_VOTE_FRACTION = 0.40  # skip a ticker's prediction if too few agents got through
+                          # (quota exhaustion) — a near-empty vote is not a forecast
 
 
 # ── jsonl helpers ─────────────────────────────────────────────────────────────
@@ -106,6 +108,15 @@ def predict_today(date: str | None, tickers: list[str], agents: int,
               f"{len(ctx['news_headlines'])} headlines) — {len(personas)} agents")
         views = think_population(personas, ctx, model=model)
         fc = aggregate.aggregate(views, personas, edges, target_horizon=horizon)
+
+        # Quota guard: if too many agents abstained (claude window exhausted),
+        # this isn't a real forecast — skip it (don't pollute pending/scoreboard).
+        # Re-running later fills it from cache + fresh quota.
+        if fc["n_votes"] < max(10, int(len(personas) * MIN_VOTE_FRACTION)):
+            print(f"    => SKIP {tkr}: only {fc['n_votes']}/{len(personas)} votes "
+                  f"({fc['n_abstain']} abstained — likely quota). Re-run later to fill.")
+            continue
+
         rec = {
             "as_of_date": as_of, "ticker": tkr, "horizon_days": horizon,
             "t0_close": ctx["t0_close"], "model": model, "n_agents": len(personas),
