@@ -28,6 +28,8 @@ RESULTS = Path(__file__).resolve().parent / "results"
 RESULTS.mkdir(parents=True, exist_ok=True)
 PENDING = RESULTS / "pending.jsonl"
 SCORED = RESULTS / "scored.jsonl"
+VIEWS = RESULTS / "views"
+VIEWS.mkdir(parents=True, exist_ok=True)
 
 DEFAULT_TICKERS = ["AAPL", "MSFT", "NVDA", "GOOGL", "AMZN"]
 DEADBAND = 0.10  # % move below which we call it "flat" for direction scoring
@@ -140,6 +142,12 @@ def predict_today(date: str | None, tickers: list[str], agents: int,
             "baseline": bl,  # non-LLM benchmark forecast for this same day
             "sample_narratives": [v["narrative"] for v in views[:5] if v.get("narrative")],
         }
+        # persist every agent's view for the visualizer (individuals + network)
+        (VIEWS / f"{as_of}_{tkr}.json").write_text(json.dumps([
+            {"pid": v["pid"], "archetype": v["archetype"], "lean": v["lean"],
+             "conviction": v["conviction"], "narrative": (v.get("narrative") or "")[:160],
+             "abstained": v.get("abstained", False)}
+            for v in views], default=str))
         # dedupe: replace any existing pending entry for same (ticker, as_of)
         pending = [p for p in pending if not (p["ticker"] == tkr and p["as_of_date"] == as_of)]
         pending.append(rec)
