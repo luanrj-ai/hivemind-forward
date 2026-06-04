@@ -52,6 +52,20 @@ def _stats(rows: list[dict]) -> dict:
     }
 
 
+def _baseline_stats(rows: list[dict]) -> dict | None:
+    """Direction hit-rate of the non-LLM time-series baseline, on the same days."""
+    bl = [r for r in rows if "baseline_dir_correct" in r]
+    if not bl:
+        return None
+    n = len(bl)
+    hits = sum(1 for r in bl if r["baseline_dir_correct"])
+    lo, hi = wilson(hits, n)
+    mae = sum(r.get("baseline_abs_error_pct", 0) for r in bl) / n
+    return {"n": n, "hits": hits, "hit_rate": round(hits / n, 4),
+            "hit_ci95": [round(lo, 4), round(hi, 4)], "mae_pct": round(mae, 4),
+            "model": next((r["baseline"]["model"] for r in bl if r.get("baseline")), "?")}
+
+
 def build(rows: list[dict]) -> dict:
     overall = _stats(rows)
     per_ticker = {}
@@ -60,7 +74,7 @@ def build(rows: list[dict]) -> dict:
         by_t[r["ticker"]].append(r)
     for t, rs in sorted(by_t.items()):
         per_ticker[t] = _stats(rs)
-    return {"overall": overall, "per_ticker": per_ticker}
+    return {"overall": overall, "per_ticker": per_ticker, "baseline": _baseline_stats(rows)}
 
 
 def _fmt(s: dict) -> str:
@@ -87,7 +101,14 @@ def main():
     sb = build(rows)
 
     print("=== forward_v01 scoreboard (leakage-free, walk-forward) ===")
-    print(f"OVERALL  {_fmt(sb['overall'])}")
+    print(f"CROWD     {_fmt(sb['overall'])}")
+    bl = sb.get("baseline")
+    if bl:
+        lo, hi = bl["hit_ci95"]
+        print(f"BASELINE  n={bl['n']:<4} dir={bl['n']:<4} "
+              f"hit={bl['hit_rate']*100:5.1f}% [{lo*100:4.1f},{hi*100:4.1f}]  "
+              f"{'model='+bl['model']:<26} {'':5} MAE={bl['mae_pct']:.2f}%  "
+              f"← non-LLM benchmark")
     print("per ticker:")
     for t, s in sb["per_ticker"].items():
         print(f"  {t:<6} {_fmt(s)}")

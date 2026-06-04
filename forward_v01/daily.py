@@ -21,7 +21,7 @@ import os
 import sys
 from pathlib import Path
 
-from forward_v01 import aggregate, data_live, population
+from forward_v01 import aggregate, baseline, data_live, population
 from forward_v01.agent_think import think_population, MODEL
 
 RESULTS = Path(__file__).resolve().parent / "results"
@@ -82,6 +82,10 @@ def score_pending() -> tuple[int, int]:
             "in_ci": fc["ci_low_pct"] <= actual_pct <= fc["ci_high_pct"],
             "abs_error_pct": round(abs(actual_pct - exp), 3),
         })
+        bl = rec.get("baseline")
+        if bl:
+            rec["baseline_dir_correct"] = _dir(bl["mean_pct"]) == _dir(actual_pct)
+            rec["baseline_abs_error_pct"] = round(abs(actual_pct - bl["mean_pct"]), 3)
         _append(SCORED, rec)
         scored_now += 1
         print(f"  scored {tkr} {as_of}→{target_date}: pred {exp:+.2f}% "
@@ -104,8 +108,17 @@ def predict_today(date: str | None, tickers: list[str], agents: int,
         as_of = date or data_live.latest_trading_date(tkr)
         ctx = data_live.context(tkr, as_of)
         as_of = ctx["date"]  # snap to the real bar date
+
+        # Non-LLM time-series baseline: shown ONLY to institutional agents
+        # (tier>=4, via ctx["tsfm"]) and scored as a benchmark vs the crowd.
+        closes = [p["close"] for p in ctx.get("price_window", [])]
+        bl = baseline.forecast(closes, horizon) if len(closes) >= 6 else None
+        if bl:
+            ctx["tsfm"] = bl
+
         print(f"\n  {tkr} @ {as_of} (close ${ctx['t0_close']}, "
-              f"{len(ctx['news_headlines'])} headlines) — {len(personas)} agents")
+              f"{len(ctx['news_headlines'])} headlines) — {len(personas)} agents"
+              + (f" · baseline[{bl['model']}] {bl['mean_pct']:+.2f}%" if bl else ""))
         views = think_population(personas, ctx, model=model)
         daily_vol = (ctx["indicators"].get("ann_vol_pct") or 0) / (252 ** 0.5)
         fc = aggregate.aggregate(views, personas, edges, target_horizon=horizon,
@@ -124,6 +137,7 @@ def predict_today(date: str | None, tickers: list[str], agents: int,
             "t0_close": ctx["t0_close"], "model": model, "n_agents": len(personas),
             "n_headlines": len(ctx["news_headlines"]),
             "forecast": fc,
+            "baseline": bl,  # non-LLM benchmark forecast for this same day
             "sample_narratives": [v["narrative"] for v in views[:5] if v.get("narrative")],
         }
         # dedupe: replace any existing pending entry for same (ticker, as_of)

@@ -120,8 +120,8 @@ def _path_block(pw: list) -> str:
 def _tsfm_block(ts: dict) -> str:
     if not ts:
         return ""
-    return (f"Time-series model (TimesFM) next-day forecast: mean {ts['mean_pct']:+.2f}%, "
-            f"80% range [{ts['q10_pct']:+.2f}%, {ts['q90_pct']:+.2f}%].")
+    return (f"Quant time-series model ({ts.get('model', 'baseline')}) next-day forecast: "
+            f"mean {ts['mean_pct']:+.2f}%, 80% range [{ts['q10_pct']:+.2f}%, {ts['q90_pct']:+.2f}%].")
 
 
 def _news_block(headlines: list, rng, k: int) -> str:
