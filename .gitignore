@@ -1,0 +1,51 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Caches we don't want pushed
+toy_v06/cache/*.json
+toy_v06/cache/llm/
+toy_v06/cache/llm_v08/
+mvp/cache/
+
+# Old / oversize result files (keep only the latest demo data)
+toy_v06/results/toy_run_latest.json
+
+# Internal design notes (not part of the deployable app)
+DESIGN.md
+research/
+
+# Secrets
+.env
+.env.local
+*.pem
+*.key
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+
+# Streamlit local secrets (use Streamlit Cloud secrets manager instead)
+.streamlit/secrets.toml
+
+# Misc
+*.parquet
+
+# Claude Code local state
+.claude/

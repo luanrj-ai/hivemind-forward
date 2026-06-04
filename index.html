@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Hivemind Forward — 每天预测明天，第二天用真实数据打分</title>
+<meta name="description" content="零泄露的前向多 agent 股市预测器：每个交易日 750 个 LLM agent 预测次日走势，第二天用真实收盘评分。没有 lookahead，没有训练数据污染。" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --bg:#07060b; --bg2:#100c12; --ink:#f7f4ec; --muted:#a39c8e; --faint:#6a6253;
+    --up:#22c55e; --down:#ef4444; --v1:#f59e0b; --v2:#fcd34d; --border:rgba(255,238,210,.10);
+    --card:rgba(18,13,9,.66);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--ink);
+    font-family:"Noto Sans SC","Space Grotesk",system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased;overflow-x:hidden;line-height:1.5}
+  .mono{font-family:"JetBrains Mono",monospace;font-variant-numeric:tabular-nums}
+  a{color:inherit}
+  canvas#swarm{position:fixed;inset:0;width:100%;height:100%;z-index:0;display:block}
+  .vignette{position:fixed;inset:0;z-index:1;pointer-events:none;
+    background:radial-gradient(120% 90% at 50% 8%,transparent 32%,rgba(6,4,3,.6) 76%,rgba(6,4,3,.96) 100%)}
+  .grain{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.04;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+  .wrap{position:relative;z-index:2;max-width:1080px;margin:0 auto;padding:0 28px}
+
+  nav{position:sticky;top:0;z-index:50;background:rgba(7,6,11,.72);
+    backdrop-filter:blur(12px) saturate(1.3);-webkit-backdrop-filter:blur(12px) saturate(1.3);
+    border-bottom:1px solid var(--border)}
+  .navinner{display:flex;align-items:center;justify-content:space-between;padding:14px 28px;max-width:1140px;margin:0 auto}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:700;letter-spacing:.01em;font-family:"Space Grotesk",sans-serif}
+  .hex{width:24px;height:24px;display:grid;place-items:center;color:var(--v2);filter:drop-shadow(0 0 10px rgba(252,211,77,.55))}
+  .navlinks{display:flex;gap:24px;font-size:.85rem;color:var(--muted)}
+  .navlinks a{text-decoration:none;transition:color .2s}
+  .navlinks a:hover{color:var(--ink)}
+  @media(max-width:640px){.navlinks{display:none}}
+
+  .hero{min-height:82vh;display:flex;flex-direction:column;justify-content:center;padding:56px 0 64px}
+  .eyebrow{display:inline-flex;align-items:center;gap:9px;font-family:"JetBrains Mono",monospace;
+    font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;color:var(--v2);
+    border:1px solid var(--border);border-radius:999px;padding:7px 14px;background:rgba(245,158,11,.07);
+    width:fit-content;margin-bottom:24px}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--up);box-shadow:0 0 10px var(--up);animation:pulse 1.6s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+  h1{font-size:clamp(2.4rem,6vw,4.6rem);line-height:1.04;font-weight:700;letter-spacing:-.02em;margin-bottom:22px;
+    font-family:"Space Grotesk","Noto Sans SC",sans-serif}
+  h1 .grad{background:linear-gradient(105deg,var(--v1),var(--v2) 60%,#fff);
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  .sub{font-size:clamp(1rem,1.5vw,1.18rem);color:var(--muted);max-width:640px;line-height:1.65;margin-bottom:34px}
+  .sub b{color:var(--ink);font-weight:600}
+  .cta{display:flex;gap:13px;align-items:center;flex-wrap:wrap}
+  .btn{font-family:inherit;font-size:.95rem;font-weight:600;padding:14px 26px;border-radius:12px;
+    border:none;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:9px;transition:transform .15s,box-shadow .25s}
+  .btn-primary{background:linear-gradient(105deg,var(--v1),var(--v2));color:#07060b;box-shadow:0 8px 38px rgba(245,158,11,.38)}
+  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 12px 48px rgba(252,211,77,.5)}
+  .btn-ghost{background:rgba(255,255,255,.04);color:var(--ink);border:1px solid var(--border)}
+  .btn-ghost:hover{background:rgba(255,255,255,.08)}
+
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);
+    border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-top:48px}
+  .stat{background:var(--card);backdrop-filter:blur(8px);padding:20px 18px}
+  .stat .v{font-family:"JetBrains Mono",monospace;font-size:1.45rem;font-weight:700;color:var(--ink)}
+  .stat .v .u{color:var(--v2)}
+  .stat .k{font-size:.76rem;color:var(--muted);margin-top:5px}
+  @media(max-width:640px){.stats{grid-template-columns:repeat(2,1fr)}}
+
+  section.block{position:relative;z-index:2;padding:84px 0;border-top:1px solid var(--border);
+    background:linear-gradient(180deg,rgba(7,6,11,.35),rgba(16,12,18,.86))}
+  .kicker{font-family:"JetBrains Mono",monospace;font-size:.73rem;letter-spacing:.2em;text-transform:uppercase;color:var(--v1);margin-bottom:13px}
+  h2{font-size:clamp(1.7rem,3.4vw,2.5rem);font-weight:700;letter-spacing:-.02em;margin-bottom:16px;max-width:760px;
+    font-family:"Space Grotesk","Noto Sans SC",sans-serif}
+  .lead{color:var(--muted);max-width:680px;font-size:1.04rem;line-height:1.7;margin-bottom:8px}
+  .lead b{color:var(--ink);font-weight:600}
+
+  /* daily loop */
+  .loop{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--border);
+    border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-top:40px}
+  .step{background:var(--card);padding:24px 20px;position:relative}
+  .step .n{font-family:"JetBrains Mono",monospace;font-size:.72rem;color:var(--v2);letter-spacing:.1em}
+  .step h3{font-size:1.02rem;font-weight:600;margin:9px 0 7px;font-family:"Space Grotesk","Noto Sans SC",sans-serif}
+  .step p{font-size:.86rem;color:var(--muted);line-height:1.55}
+  @media(max-width:860px){.loop{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:520px){.loop{grid-template-columns:1fr}}
+
+  /* about cards */
+  .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:42px}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:30px 26px;backdrop-filter:blur(8px)}
+  .card .tag{font-family:"JetBrains Mono",monospace;font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--v2);margin-bottom:14px;display:flex;align-items:center;gap:9px}
+  .card .ic{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;
+    background:rgba(245,158,11,.12);border:1px solid var(--border);color:var(--v2)}
+  .card h3{font-size:1.22rem;font-weight:700;margin-bottom:13px;font-family:"Space Grotesk","Noto Sans SC",sans-serif}
+  .card p{color:var(--muted);font-size:.95rem;line-height:1.72;margin-bottom:13px}
+  .card p:last-child{margin-bottom:0}
+  .card b{color:var(--ink);font-weight:600}
+  .card .hl{color:var(--v2);font-weight:600}
+  @media(max-width:860px){.cards{grid-template-columns:1fr}}
+
+  .quote{margin-top:44px;border-left:3px solid var(--v1);padding:6px 0 6px 22px;max-width:720px}
+  .quote p{font-size:1.12rem;line-height:1.7;color:var(--ink);font-weight:500}
+  .quote .who{color:var(--faint);font-size:.86rem;margin-top:8px;font-family:"JetBrains Mono",monospace}
+
+  /* scoreboard */
+  .sb{margin-top:40px;border:1px solid var(--border);border-radius:18px;overflow:hidden;background:var(--card)}
+  .sbhead{display:flex;align-items:center;justify-content:space-between;padding:18px 24px;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:12px}
+  .sbhead .t{font-family:"JetBrains Mono",monospace;font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;color:var(--faint)}
+  .badge{font-family:"JetBrains Mono",monospace;font-size:.74rem;padding:6px 13px;border-radius:999px;
+    background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.35);color:#fda4a4}
+  .sbgrid{display:grid;grid-template-columns:repeat(4,1fr)}
+  .sbcell{padding:22px 24px;border-right:1px solid var(--border);border-top:1px solid var(--border)}
+  .sbcell:nth-child(-n+4){border-top:none}
+  .sbcell .v{font-family:"JetBrains Mono",monospace;font-size:1.8rem;font-weight:700}
+  .sbcell .k{font-size:.8rem;color:var(--muted);margin-top:5px}
+  @media(max-width:640px){.sbgrid{grid-template-columns:repeat(2,1fr)}}
+  .rows{padding:8px 0}
+  .row{display:grid;grid-template-columns:64px 1fr 1fr 70px;gap:10px;padding:11px 24px;align-items:center;font-size:.9rem;border-top:1px solid var(--border)}
+  .row.h{color:var(--faint);font-family:"JetBrains Mono",monospace;font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;border-top:none}
+  .row .tk{font-weight:600}
+  .pill{font-family:"JetBrains Mono",monospace;font-size:.84rem}
+  .ok{color:var(--up)} .no{color:var(--down)}
+
+  footer{position:relative;z-index:2;border-top:1px solid var(--border);padding:50px 0 70px;background:rgba(7,6,11,.85)}
+  .foot{display:flex;justify-content:space-between;align-items:center;gap:18px;flex-wrap:wrap;color:var(--faint);font-size:.85rem}
+  .foot a{color:var(--muted);text-decoration:none}.foot a:hover{color:var(--ink)}
+  .disc{margin-top:18px;color:var(--faint);font-size:.78rem;max-width:680px;line-height:1.6}
+</style>
+</head>
+<body>
+<canvas id="swarm"></canvas>
+<div class="vignette"></div>
+<div class="grain"></div>
+
+<nav>
+  <div class="navinner">
+    <div class="brand"><span class="hex">⬡</span> Hivemind <span style="color:var(--v2)">Forward</span></div>
+    <div class="navlinks">
+      <a href="#how">如何运作</a>
+      <a href="#about">关于</a>
+      <a href="#track">战绩</a>
+      <a href="explore.html">探索蜂巢</a>
+      <a href="https://github.com/julieluan/ai-trading-sim/tree/forward-predict" target="_blank" rel="noopener">GitHub ↗</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero wrap">
+  <div class="eyebrow"><span class="dot"></span> 零泄露 · 前向验证 · 每日自动</div>
+  <h1>每天，让 <span class="grad">750 个 AI 交易员</span><br/>预测明天。<br/>第二天用真实数据打分。</h1>
+  <p class="sub">每个交易日，<b>150 个独一无二的 LLM agent × 5 只股票</b>读当天真实行情与新闻，各自推理出对次日的判断，汇成一个带波动率校准区间的预测。<b>第二天，用真实收盘评分。</b>预测的目标在做出时根本不存在——所以没有 lookahead，也没有训练数据污染。这是检验「AI 群体到底有没有真实 edge」唯一诚实的方法。</p>
+  <div class="cta">
+    <a class="btn btn-primary" href="explore.html">探索蜂巢 · 看每个 agent →</a>
+    <a class="btn btn-ghost" href="#about">为什么这么做</a>
+    <a class="btn btn-ghost" href="#track">实时战绩</a>
+  </div>
+  <div class="stats">
+    <div class="stat"><div class="v">750<span class="u">/天</span></div><div class="k">LLM agent 推理</div></div>
+    <div class="stat"><div class="v">5</div><div class="k">只股票 · 每日滚动</div></div>
+    <div class="stat"><div class="v">0</div><div class="k">lookahead / 泄露</div></div>
+    <div class="stat"><div class="v">T+1</div><div class="k">次日真实数据评分</div></div>
+  </div>
+</header>
+
+<!-- HOW -->
+<section class="block" id="how">
+  <div class="wrap">
+    <div class="kicker">如何运作 · The Daily Loop</div>
+    <h2>一条命令，每个交易日自动跑一次</h2>
+    <p class="lead">先给到期的旧预测拉真实收盘评分，再做今天的新预测。两步之间隔着一整夜——目标价格在预测时还不存在，泄露从结构上被堵死。</p>
+    <div class="loop">
+      <div class="step"><div class="n">01</div><h3>读真实世界</h3><p>每只股票拉当天的 live 行情、技术指标、GDELT 新闻头条——全部 ≤ 今天。</p></div>
+      <div class="step"><div class="n">02</div><h3>150 个大脑各自想</h3><p>每个 agent 是独一无二的 persona（资本、时间尺度、风险、逆向性各异），用语言独立推出自己的多空判断。</p></div>
+      <div class="step"><div class="n">03</div><h3>群体涌现</h3><p>agent 沿带符号的影响力网络相互带动——羊群与逆向在数学上涌现，不是脚本写死的。</p></div>
+      <div class="step"><div class="n">04</div><h3>聚合成预测</h3><p>按资本 × 影响力 × 时间尺度加权，得出次日预期收益 + 锚定真实波动率的 95% 区间。</p></div>
+      <div class="step"><div class="n">05</div><h3>第二天评分</h3><p>用真实收盘对比：方向命中？落在区间内？误差多少？记入永久、可复现的战绩。</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section class="block" id="about">
+  <div class="wrap">
+    <div class="kicker">关于 · Why / How / Expected Outcome</div>
+    <h2>为什么世界不需要又一个「回测很赚」的 AI 交易模型</h2>
+    <p class="lead">因为几乎所有 AI 交易研究都犯同一个错——而这个项目存在，就是为了不犯它。</p>
+
+    <div class="cards">
+      <div class="card">
+        <div class="tag"><span class="ic">?</span> Why · 为什么</div>
+        <h3>回测在骗你</h3>
+        <p>LLM 有<b>训练截止日</b>。让它「预测」2024 年的 AAPL，它很可能<b>记得</b>当时实际发生了什么——这不是预测，是<span class="hl">泄题</span>。</p>
+        <p>于是几乎所有「AI 选股回测很赚」的结论都被这种训练数据污染所影响，<b>无法分辨是真有 edge，还是模型在背答案</b>。</p>
+        <p>唯一诚实的检验:预测一个<b>做出时还不存在</b>的未来交易日,第二天再看。</p>
+      </div>
+      <div class="card">
+        <div class="tag"><span class="ic">⚙</span> How · 怎么做</div>
+        <h3>前向、群体、自动</h3>
+        <p>每个交易日,<b>150 个独一无二的 LLM agent × 5 只股票</b>读当天真实行情与新闻,用语言各自推理。</p>
+        <p>它们沿<b>带符号的影响力网络</b>相互影响——羊群与逆向<span class="hl">涌现</span>而非写死;再按资本与影响力加权聚合成一个带<b>波动率校准区间</b>的次日预测。</p>
+        <p>第二天用 <b>live 真实收盘</b>评分:方向命中率(带置信区间)、区间校准度、平均误差。整条链自动跑、零泄露、可复现。</p>
+      </div>
+      <div class="card">
+        <div class="tag"><span class="ic">◎</span> Expected · 预期结果</div>
+        <h3>一份诚实的成绩单</h3>
+        <p>原假设是真的:我们<b>预期群体接近抛硬币</b>(方向 ~50%)。战绩面板会明确标注:命中率的置信区间<b>还横跨 50%</b>时,就是「尚不显著」。</p>
+        <p>价值不在「跑赢市场」,而在<span class="hl">这套诚实的检验装置本身</span>——以及它能量出 AI 群体有没有未被污染的真实 edge、它有什么「性格」(比如超买就看空的均值回归倾向)。</p>
+        <p>若几十个交易日后真出现了把区间推离 50% 的 edge,那才是<b>可信的、非回测幻觉的</b>信号。</p>
+      </div>
+    </div>
+
+    <div class="quote">
+      <p>“别问『回测能赚多少』。问『把训练数据里的答案抹掉之后,它还剩多少』。”</p>
+      <div class="who">— 这个项目的全部立场</div>
+    </div>
+  </div>
+</section>
+
+<!-- TRACK RECORD -->
+<section class="block" id="track">
+  <div class="wrap">
+    <div class="kicker">实时战绩 · Leakage-free track record</div>
+    <h2>每一条都是前向、零泄露的预测</h2>
+    <p class="lead">下面是当前累积的真实成绩。<b>样本还极小</b>——前向测试的代价就是慢,要几十个交易日才有统计意义。这份诚实,正是重点。</p>
+
+    <div class="sb">
+      <div class="sbhead">
+        <span class="t">overall · walk-forward</span>
+        <span class="badge">⚠ 仅 5 个观测 · 统计上仍 = 抛硬币</span>
+      </div>
+      <div class="sbgrid">
+        <div class="sbcell"><div class="v">60%</div><div class="k">方向命中率 (3/5)</div></div>
+        <div class="sbcell"><div class="v">100%</div><div class="k">落入 95% 区间 (5/5)</div></div>
+        <div class="sbcell"><div class="v">2.20%</div><div class="k">平均绝对误差</div></div>
+        <div class="sbcell"><div class="v">[23,88]</div><div class="k">命中率 95% CI ·横跨50%</div></div>
+      </div>
+      <div class="rows">
+        <div class="row h"><span>股票</span><span>预测 (06-02→06-03)</span><span>实际</span><span>方向</span></div>
+        <div class="row"><span class="tk">AAPL</span><span class="pill">−0.41% 空</span><span class="pill no">−1.57%</span><span class="ok">✓</span></div>
+        <div class="row"><span class="tk">AMZN</span><span class="pill">−0.30% 空</span><span class="pill no">−2.53%</span><span class="ok">✓</span></div>
+        <div class="row"><span class="tk">GOOGL</span><span class="pill">−0.24% 空</span><span class="pill no">−0.79%</span><span class="ok">✓</span></div>
+        <div class="row"><span class="tk">MSFT</span><span class="pill">+0.14% 多</span><span class="pill no">−3.17%</span><span class="no">✗</span></div>
+        <div class="row"><span class="tk">NVDA</span><span class="pill">+0.12% 多</span><span class="pill no">−3.62%</span><span class="no">✗</span></div>
+      </div>
+    </div>
+    <p class="disc">06-03 是全市场普跌日(5 只全红)。模型整体偏空的「性格」撞上跌日,猜对了 3 个看空的、错了 2 个看多的。前一天它看空 AAPL、AAPL 却涨 +2.9%(错)。一对一错——这正是 n 太小时该有的样子。数字随每日自动跑实时更新。</p>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="foot">
+      <div class="brand"><span class="hex">⬡</span> Hivemind Forward</div>
+      <div style="display:flex;gap:22px">
+        <a href="https://github.com/julieluan/ai-trading-sim/tree/forward-predict" target="_blank" rel="noopener">GitHub</a>
+        <a href="#about">关于</a>
+        <a href="#track">战绩</a>
+      </div>
+    </div>
+    <p class="disc">研究 / 教育用途的方法论 demo,<b>不构成投资建议</b>。前向测试的目的是诚实地度量,而非承诺收益。预测由 LLM 集成生成,可能(并且大概率)接近随机。</p>
+  </div>
+</footer>
+
+<script>
+// lightweight agent swarm — drifting nodes with faint signed links, herding toward a slow attractor
+(function(){
+  const c=document.getElementById('swarm'),x=c.getContext('2d');
+  let w,h,P=[],raf,t=0;
+  const N=window.innerWidth<640?42:78;
+  function size(){w=c.width=innerWidth*devicePixelRatio;h=c.height=innerHeight*devicePixelRatio;c.style.width=innerWidth+'px';c.style.height=innerHeight+'px';}
+  function init(){P=[];for(let i=0;i<N;i++){P.push({x:Math.random()*w,y:Math.random()*h,vx:(Math.random()-.5)*.25*devicePixelRatio,vy:(Math.random()-.5)*.25*devicePixelRatio,r:(Math.random()*1.6+.8)*devicePixelRatio,bull:Math.random()>.5});}}
+  function step(){
+    t+=0.004;
+    const ax=w*(.5+.28*Math.cos(t)),ay=h*(.42+.22*Math.sin(t*1.3)); // slow attractor = "the news"
+    x.clearRect(0,0,w,h);
+    // faint links (herding)
+    for(let i=0;i<P.length;i++){for(let j=i+1;j<P.length;j++){
+      const a=P[i],b=P[j],dx=a.x-b.x,dy=a.y-b.y,d=dx*dx+dy*dy,R=(120*devicePixelRatio)**2;
+      if(d<R){const o=(1-d/R)*.16;x.strokeStyle='rgba(245,158,11,'+o+')';x.lineWidth=devicePixelRatio*.5;x.beginPath();x.moveTo(a.x,a.y);x.lineTo(b.x,b.y);x.stroke();}
+    }}
+    for(const p of P){
+      p.vx+=(ax-p.x)*0.00018; p.vy+=(ay-p.y)*0.00018;
+      p.vx*=0.985; p.vy*=0.985; p.x+=p.vx; p.y+=p.vy;
+      if(p.x<0||p.x>w)p.vx*=-1; if(p.y<0||p.y>h)p.vy*=-1;
+      x.beginPath();x.arc(p.x,p.y,p.r,0,7);
+      x.fillStyle=p.bull?'rgba(252,211,77,.9)':'rgba(245,158,11,.55)';
+      x.shadowBlur=8*devicePixelRatio;x.shadowColor='rgba(245,158,11,.5)';x.fill();x.shadowBlur=0;
+    }
+    raf=requestAnimationFrame(step);
+  }
+  function start(){size();init();cancelAnimationFrame(raf);step();}
+  addEventListener('resize',start); start();
+  // pause when tab hidden (save cycles)
+  document.addEventListener('visibilitychange',()=>{if(document.hidden)cancelAnimationFrame(raf);else step();});
+})();
+</script>
+</body>
+</html>

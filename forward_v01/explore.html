@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Hivemind Forward — 探索蜂巢</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet" />
+<style>
+  :root{--bg:#07060b;--bg2:#100c12;--ink:#f7f4ec;--muted:#a39c8e;--faint:#6a6253;
+    --up:#22c55e;--down:#ef4444;--v1:#f59e0b;--v2:#fcd34d;--border:rgba(255,238,210,.10);--card:rgba(18,13,9,.72)}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--bg);color:var(--ink);font-family:"Noto Sans SC","Space Grotesk",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  .mono{font-family:"JetBrains Mono",monospace;font-variant-numeric:tabular-nums}
+  a{color:inherit;text-decoration:none}
+  nav{position:sticky;top:0;z-index:50;background:rgba(7,6,11,.82);backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
+  .navinner{display:flex;align-items:center;justify-content:space-between;padding:13px 24px;max-width:1320px;margin:0 auto}
+  .brand{display:flex;align-items:center;gap:9px;font-weight:700;font-family:"Space Grotesk",sans-serif}
+  .hex{color:var(--v2);filter:drop-shadow(0 0 9px rgba(252,211,77,.5))}
+  .navlinks{display:flex;gap:20px;font-size:.85rem;color:var(--muted)}
+  .navlinks a:hover{color:var(--ink)}
+  .wrap{max-width:1320px;margin:0 auto;padding:22px 24px 60px}
+
+  h1{font-size:1.5rem;font-weight:700;font-family:"Space Grotesk","Noto Sans SC",sans-serif;letter-spacing:-.01em}
+  .sub{color:var(--muted);font-size:.9rem;margin-top:4px}
+  .controls{display:flex;gap:22px;flex-wrap:wrap;align-items:flex-end;margin:20px 0 14px}
+  .ctl .lbl{font-family:"JetBrains Mono",monospace;font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);margin-bottom:7px}
+  .chips{display:flex;gap:7px;flex-wrap:wrap}
+  .chip{font-family:"JetBrains Mono",monospace;font-size:.82rem;padding:7px 13px;border-radius:9px;cursor:pointer;
+    background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--muted);transition:.15s}
+  .chip:hover{color:var(--ink)}
+  .chip.on{background:linear-gradient(105deg,var(--v1),var(--v2));color:#07060b;border-color:transparent;font-weight:600}
+  .colorby{margin-left:auto}
+
+  .grid{display:grid;grid-template-columns:1fr 372px;gap:16px;align-items:start}
+  @media(max-width:980px){.grid{grid-template-columns:1fr}}
+  .panel{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden}
+  .ph{padding:13px 18px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+  .ph .t{font-family:"JetBrains Mono",monospace;font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--faint)}
+
+  /* network */
+  .netwrap{position:relative}
+  #net{display:block;width:100%;height:560px;cursor:crosshair}
+  .leg{position:absolute;left:16px;bottom:14px;display:flex;gap:16px;flex-wrap:wrap;font-size:.74rem;color:var(--muted);z-index:2;pointer-events:none}
+  .leg i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:middle}
+  .leg .ln{width:16px;height:0;border-top:2px solid;display:inline-block;margin-right:5px;vertical-align:middle}
+  .tip{position:absolute;z-index:5;pointer-events:none;transform:translate(-50%,-112%);min-width:190px;max-width:280px;
+    background:rgba(12,9,6,.97);border:1px solid var(--border);border-radius:11px;padding:11px 13px;font-size:.78rem;line-height:1.5;
+    box-shadow:0 10px 34px rgba(0,0,0,.6);backdrop-filter:blur(6px);display:none}
+  .tip .nm{font-weight:700;font-family:"Space Grotesk",sans-serif}
+  .tip .ro{font-family:"JetBrains Mono",monospace;font-size:.66rem;letter-spacing:.08em;text-transform:uppercase;color:var(--v2);margin:2px 0 7px}
+  .tip .kv{display:flex;justify-content:space-between;gap:14px;color:var(--muted)}
+  .tip .kv b{color:var(--ink);font-weight:600}
+  .tip .nar{margin-top:8px;padding-top:8px;border-top:1px solid var(--border);color:var(--ink);font-style:italic}
+  .lean-long{color:var(--up)}.lean-short{color:var(--down)}.lean-neutral{color:var(--muted)}
+
+  /* side */
+  .side{display:flex;flex-direction:column;gap:16px}
+  .pad{padding:16px 18px}
+  .fc .big{font-family:"JetBrains Mono",monospace;font-size:2rem;font-weight:700;line-height:1}
+  .fc .ci{color:var(--muted);font-size:.85rem;margin-top:6px}
+  .fc .row{display:flex;justify-content:space-between;margin-top:10px;font-size:.86rem;color:var(--muted)}
+  .fc .row b{color:var(--ink)}
+  .verdict{margin-top:12px;padding:10px 12px;border-radius:10px;font-size:.86rem;display:flex;justify-content:space-between;align-items:center}
+  .v-ok{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.35);color:#86efac}
+  .v-no{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.35);color:#fda4a4}
+  .v-pend{background:rgba(245,158,11,.08);border:1px solid var(--border);color:var(--v2)}
+  .votebar{display:flex;height:26px;border-radius:7px;overflow:hidden;margin:6px 0 4px;border:1px solid var(--border)}
+  .votebar div{display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:600;color:#07060b}
+  .bar-l{background:var(--up)}.bar-s{background:var(--down)}.bar-n{background:#5b5446;color:var(--ink)}
+  .arch .ar{display:grid;grid-template-columns:96px 1fr 38px;gap:8px;align-items:center;font-size:.76rem;margin:5px 0}
+  .arch .track{height:8px;background:rgba(255,255,255,.05);border-radius:5px;position:relative;overflow:hidden}
+  .arch .fill{position:absolute;top:0;bottom:0}
+  #spark{display:block;width:100%;height:120px}
+
+  .tl{margin-top:16px}
+  #timeline{display:block;width:100%;height:150px}
+  .sbnums{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+  .sbn{background:var(--card);padding:14px 16px}
+  .sbn .v{font-family:"JetBrains Mono",monospace;font-size:1.3rem;font-weight:700}
+  .sbn .k{font-size:.74rem;color:var(--muted);margin-top:3px}
+  .note{color:var(--faint);font-size:.78rem;margin-top:10px;line-height:1.5}
+  .banner{background:rgba(245,158,11,.08);border:1px solid var(--border);border-radius:10px;padding:9px 13px;font-size:.8rem;color:var(--v2);margin-bottom:12px}
+</style>
+</head>
+<body>
+<nav><div class="navinner">
+  <div class="brand"><span class="hex">⬡</span> Hivemind <span style="color:var(--v2)">Forward</span> · 探索蜂巢</div>
+  <div class="navlinks"><a href="landing.html">← 首页</a><a href="https://github.com/julieluan/ai-trading-sim/tree/forward-predict" target="_blank" rel="noopener">GitHub ↗</a></div>
+</div></nav>
+
+<div class="wrap">
+  <h1>每个个体、它们的关系与行为,如何汇成一个预测</h1>
+  <div class="sub">每个节点是一个 LLM agent。颜色=它当天的多空判断,连线=有符号影响力(谁带动谁),悬停看它是谁、看到了什么、怎么想。</div>
+
+  <div class="controls">
+    <div class="ctl"><div class="lbl">日期 (as-of)</div><div class="chips" id="dateChips"></div></div>
+    <div class="ctl"><div class="lbl">股票</div><div class="chips" id="tickChips"></div></div>
+    <div class="ctl colorby"><div class="lbl">节点着色</div><div class="chips" id="colorChips">
+      <span class="chip on" data-c="lean">按多空</span><span class="chip" data-c="arch">按原型</span></div></div>
+  </div>
+
+  <div id="banner"></div>
+
+  <div class="grid">
+    <div class="panel netwrap">
+      <div class="ph"><span class="t" id="netTitle">influence network</span><span class="t" id="netCount"></span></div>
+      <canvas id="net"></canvas>
+      <div class="leg">
+        <span><i style="background:var(--up)"></i>看多</span>
+        <span><i style="background:var(--down)"></i>看空</span>
+        <span><i style="background:#5b5446"></i>中性</span>
+        <span><span class="ln" style="border-color:rgba(245,158,11,.6)"></span>跟随(+)</span>
+        <span><span class="ln" style="border-color:rgba(239,68,68,.6)"></span>逆向(−)</span>
+        <span style="color:var(--faint)">节点大小 = 资本</span>
+      </div>
+      <div class="tip" id="tip"></div>
+    </div>
+
+    <div class="side">
+      <div class="panel fc">
+        <div class="ph"><span class="t">forecast · <span id="fcTicker"></span></span><span class="t" id="fcDate"></span></div>
+        <div class="pad">
+          <div class="big" id="fcExp">—</div>
+          <div class="ci" id="fcCI"></div>
+          <div class="votebar" id="voteBar"></div>
+          <div class="row"><span>共识</span><b id="fcCons"></b></div>
+          <div class="row"><span>基准 (非LLM)</span><b id="fcBase"></b></div>
+          <div class="verdict" id="verdict"></div>
+        </div>
+      </div>
+
+      <div class="panel arch">
+        <div class="ph"><span class="t">behavior · 各原型净倾向</span></div>
+        <div class="pad" id="archBars"></div>
+      </div>
+
+      <div class="panel">
+        <div class="ph"><span class="t">price · 路径 + 预测 ±CI + 实际</span></div>
+        <div class="pad"><canvas id="spark"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tl">
+    <div class="panel">
+      <div class="ph"><span class="t">track record · 累积方向命中率 (前向, 零泄露)</span></div>
+      <div class="pad">
+        <div class="sbnums" id="sbNums"></div>
+        <canvas id="timeline"></canvas>
+        <div class="note" id="sbNote"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="results/viz_data.js"></script>
+<script>
+const D = window.VIZ_DATA;
+const ARCH_COLOR = {super_influencer:'#fcd34d',pod_pm:'#60a5fa',activist_short:'#ef4444',sell_side:'#a78bfa',
+  cta_forced:'#94a3b8',retail_fomo:'#f59e0b',permabull:'#22c55e',day_trader:'#fb923c',
+  economist_macro:'#2dd4bf',economist_political:'#f472b6',economist_trader:'#facc15'};
+const LEAN_COLOR = {long:'#22c55e',short:'#ef4444',neutral:'#7a7160'};
+
+let state = {date:null, ticker:null, colorBy:'lean'};
+const personas = D.population.personas;
+const idxByPid = {}; personas.forEach((p,i)=>idxByPid[p.pid]=i);
+
+// ---- controls ----
+function chips(elId, items, cur, on){
+  const el=document.getElementById(elId); el.innerHTML='';
+  items.forEach(it=>{const c=document.createElement('span');c.className='chip'+(it===cur?' on':'');c.textContent=it;
+    c.onclick=()=>on(it); el.appendChild(c);});
+}
+function setDate(d){state.date=d; const ts=Object.keys(D.cells[d]).sort(); if(!ts.includes(state.ticker))state.ticker=ts[0]; render();}
+function setTicker(t){state.ticker=t; render();}
+document.querySelectorAll('#colorChips .chip').forEach(c=>c.onclick=()=>{
+  state.colorBy=c.dataset.c; document.querySelectorAll('#colorChips .chip').forEach(x=>x.classList.toggle('on',x===c)); paintNodes();});
+
+// ---- network force sim ----
+const cv=document.getElementById('net'), cx=cv.getContext('2d');
+const tip=document.getElementById('tip');
+let nodes=[], edges=[], raf=null, DPR=Math.min(2,window.devicePixelRatio||1);
+function sizeCanvas(){cv.width=cv.clientWidth*DPR;cv.height=cv.clientHeight*DPR;}
+function radius(cap){const r=cap>0?Math.log10(cap+10):3; return (3+ (r-3)*1.7)*DPR;}
+
+function buildGraph(cell){
+  const views = cell.views;
+  const leanByPid={}, convByPid={}, narByPid={};
+  let activePids;
+  if(views){activePids=views.map(v=>v.pid); views.forEach(v=>{leanByPid[v.pid]=v.lean;convByPid[v.pid]=v.conviction;narByPid[v.pid]=v.narrative;});}
+  else{const n=cell.forecast.n_votes||cell.forecast.n_long+cell.forecast.n_short+cell.forecast.n_neutral; activePids=personas.slice(0,n).map(p=>p.pid);}
+  const active=new Set(activePids);
+  const W=cv.width,H=cv.height;
+  nodes=activePids.map((pid,k)=>{const p=personas[idxByPid[pid]];
+    return {pid,p,lean:leanByPid[pid]||null,conv:convByPid[pid],nar:narByPid[pid],
+      x:W*(.5+.4*Math.cos(k))+ (k%7-3)*8, y:H*(.5+.4*Math.sin(k*1.3))+(k%5-2)*8, vx:0,vy:0, r:radius(p.capital)};});
+  const nodeByPid={}; nodes.forEach(n=>nodeByPid[n.pid]=n);
+  edges=[];
+  activePids.forEach(pid=>{(D.population.edges[pid]||[]).forEach(([si,w])=>{
+    const sp=personas[si]; if(sp&&active.has(sp.pid)) edges.push([nodeByPid[pid],nodeByPid[sp.pid],w]);});});
+  hasViews=!!views;
+}
+let hasViews=false;
+function simStep(){
+  const W=cv.width,H=cv.height, cxC=W/2, cyC=H/2;
+  // repulsion (O(n^2), fine for <=300)
+  for(let i=0;i<nodes.length;i++){const a=nodes[i];
+    for(let j=i+1;j<nodes.length;j++){const b=nodes[j];let dx=a.x-b.x,dy=a.y-b.y;let d2=dx*dx+dy*dy||1;
+      const f=(2600*DPR*DPR)/d2; const d=Math.sqrt(d2); const fx=f*dx/d,fy=f*dy/d; a.vx+=fx;a.vy+=fy;b.vx-=fx;b.vy-=fy;}}
+  // springs
+  const L=70*DPR;
+  edges.forEach(([a,b,w])=>{let dx=b.x-a.x,dy=b.y-a.y,d=Math.sqrt(dx*dx+dy*dy)||1;const f=(d-L)*0.012;
+    const fx=f*dx/d,fy=f*dy/d;a.vx+=fx;a.vy+=fy;b.vx-=fx;b.vy-=fy;});
+  // gravity + integrate
+  nodes.forEach(n=>{n.vx+=(cxC-n.x)*0.004;n.vy+=(cyC-n.y)*0.004;n.vx*=0.86;n.vy*=0.86;
+    n.x+=n.vx;n.y+=n.vy; n.x=Math.max(n.r,Math.min(W-n.r,n.x));n.y=Math.max(n.r,Math.min(H-n.r,n.y));});
+}
+function draw(){
+  cx.clearRect(0,0,cv.width,cv.height);
+  edges.forEach(([a,b,w])=>{cx.strokeStyle=w<0?'rgba(239,68,68,'+Math.min(.4,Math.abs(w)*.5)+')':'rgba(245,158,11,'+Math.min(.32,Math.abs(w)*.4)+')';
+    cx.lineWidth=DPR*.5;cx.beginPath();cx.moveTo(a.x,a.y);cx.lineTo(b.x,b.y);cx.stroke();});
+  nodes.forEach(n=>{cx.beginPath();cx.arc(n.x,n.y,n.r,0,7);cx.fillStyle=n._col;
+    cx.shadowBlur=6*DPR;cx.shadowColor=n._col;cx.fill();cx.shadowBlur=0;});
+}
+function paintNodes(){
+  nodes.forEach(n=>{ if(state.colorBy==='arch'){n._col=ARCH_COLOR[n.p.archetype]||'#999';}
+    else{n._col= n.lean?LEAN_COLOR[n.lean]:'#5b5446';}});
+}
+function loop(){simStep();paintNodes();draw();raf=requestAnimationFrame(loop);}
+
+// hover
+cv.onmousemove=e=>{const rect=cv.getBoundingClientRect();const mx=(e.clientX-rect.left)*DPR,my=(e.clientY-rect.top)*DPR;
+  let best=null,bd=14*DPR*14*DPR;
+  for(const n of nodes){const dx=n.x-mx,dy=n.y-my,d=dx*dx+dy*dy;if(d<bd&&d<(n.r+8*DPR)**2){if(!best||d<best._d){best=n;best._d=d;}}}
+  if(best){const p=best.p;const capS=p.capital>=1e9?'$'+(p.capital/1e9).toFixed(1)+'B':p.capital>=1e6?'$'+(p.capital/1e6).toFixed(0)+'M':p.capital>0?'$'+(p.capital/1e3).toFixed(0)+'k':'无组合';
+    let h=`<div class="nm">${p.name}</div><div class="ro">${p.archetype} · info tier ${p.info_tier}/5</div>`+
+      `<div class="kv"><span>资本</span><b>${capS}</b></div>`+
+      `<div class="kv"><span>持有期</span><b>${p.time_horizon_days}d</b></div>`+
+      `<div class="kv"><span>影响力 out</span><b>${(p.influence_out||0).toFixed(2)}</b></div>`;
+    if(best.lean) h+=`<div class="kv"><span>判断</span><b class="lean-${best.lean}">${best.lean} ${(best.conv*100|0)}%</b></div>`;
+    if(best.nar) h+=`<div class="nar">“${best.nar}”</div>`;
+    tip.innerHTML=h; tip.style.display='block';
+    tip.style.left=(best.x/DPR)+'px'; tip.style.top=(best.y/DPR)+'px';
+  } else tip.style.display='none';
+};
+cv.onmouseleave=()=>tip.style.display='none';
+
+// ---- side panels ----
+function render(){
+  // chips
+  chips('dateChips', D.dates, state.date, setDate);
+  chips('tickChips', Object.keys(D.cells[state.date]).sort(), state.ticker, setTicker);
+  const cell=D.cells[state.date][state.ticker], f=cell.forecast;
+  document.getElementById('banner').innerHTML = cell.views? '' :
+    '<div class="banner">⚠ 这一天未捕获逐个 agent 的立场(早于分层升级)。网络显示结构,节点暂为中性灰;聚合/价格/战绩数据完整。</div>';
+  document.getElementById('netTitle').textContent = `influence network · ${state.ticker} @ ${state.date}`;
+  document.getElementById('netCount').textContent = nodesLabel(cell);
+  // forecast card
+  const arrow=f.consensus_lean==='long'?'▲':f.consensus_lean==='short'?'▼':'▬';
+  document.getElementById('fcTicker').textContent=state.ticker;
+  document.getElementById('fcDate').textContent='as-of '+state.date;
+  const exp=document.getElementById('fcExp'); exp.textContent=`${arrow} ${f.expected_return_pct>=0?'+':''}${f.expected_return_pct}%`;
+  exp.className='big '+(f.consensus_lean==='long'?'lean-long':f.consensus_lean==='short'?'lean-short':'lean-neutral');
+  document.getElementById('fcCI').textContent=`95% CI [${f.ci_low_pct}%, ${f.ci_high_pct}%] · 日波动 ${f.daily_vol_pct||'?'}%`;
+  // votes
+  const tot=f.n_long+f.n_short+f.n_neutral||1;
+  document.getElementById('voteBar').innerHTML=
+    `<div class="bar-l" style="width:${f.n_long/tot*100}%">${f.n_long||''}</div>`+
+    `<div class="bar-s" style="width:${f.n_short/tot*100}%">${f.n_short||''}</div>`+
+    `<div class="bar-n" style="width:${f.n_neutral/tot*100}%">${f.n_neutral||''}</div>`;
+  document.getElementById('fcCons').textContent=`${f.consensus_lean} (${(f.consensus_strength*100|0)}%) · ${f.n_votes}票`;
+  document.getElementById('fcBase').textContent=cell.baseline?`${cell.baseline.mean_pct>=0?'+':''}${cell.baseline.mean_pct}% [${cell.baseline.model}]`:'—';
+  // verdict
+  const v=document.getElementById('verdict'); const sc=cell.scored;
+  if(sc&&sc.actual_return_pct!=null){const ok=sc.direction_correct;
+    v.className='verdict '+(ok?'v-ok':'v-no');
+    v.innerHTML=`<span>实际 ${sc.actual_return_pct>=0?'+':''}${sc.actual_return_pct}% (${sc.target_date})</span><b>${ok?'方向 ✓':'方向 ✗'} · ${sc.in_ci?'in-CI':'out-CI'}</b>`;
+  }else{v.className='verdict v-pend';v.innerHTML='<span>等次日收盘评分…</span><b>pending</b>';}
+  archBars(cell); drawSpark(cell); buildGraph(cell); paintNodes();
+  drawTimeline(); sbNums();
+}
+function nodesLabel(cell){const n=cell.views?cell.views.length:(cell.forecast.n_votes||0);return `${n} agents · ${edges.length||''} ties`;}
+
+function archBars(cell){
+  const el=document.getElementById('archBars');
+  if(!cell.views){el.innerHTML='<div class="note">这一天无逐 agent 立场。</div>';return;}
+  const g={}; cell.views.forEach(v=>{const s=v.lean==='long'?1:v.lean==='short'?-1:0;(g[v.archetype]=g[v.archetype]||[]).push(s*v.conviction);});
+  const rows=Object.entries(g).map(([a,xs])=>[a,xs.reduce((s,x)=>s+x,0)/xs.length,xs.length]).sort((a,b)=>b[1]-a[1]);
+  el.innerHTML=rows.map(([a,net,n])=>{const pct=Math.min(50,Math.abs(net)*50);const col=net>0?'var(--up)':net<0?'var(--down)':'var(--muted)';
+    const side=net>=0?'left:50%':'right:50%';
+    return `<div class="ar"><span style="color:var(--muted)">${a.replace('economist_','econ_')}</span>`+
+      `<div class="track"><div class="fill" style="${side};width:${pct}%;background:${col}"></div>`+
+      `<div style="position:absolute;left:50%;top:-1px;bottom:-1px;width:1px;background:var(--border)"></div></div>`+
+      `<span class="mono" style="text-align:right;color:${col}">${net>=0?'+':''}${net.toFixed(2)}</span></div>`;}).join('');
+}
+
+function drawSpark(cell){
+  const c=document.getElementById('spark'),g=c.getContext('2d');c.width=c.clientWidth*DPR;c.height=c.clientHeight*DPR;
+  const pw=cell.price_window||[]; if(pw.length<2){g.clearRect(0,0,c.width,c.height);return;}
+  const W=c.width,H=c.height,pad=8*DPR;
+  const closes=pw.map(p=>p.close), t0=closes[closes.length-1];
+  const f=cell.forecast, predLo=t0*(1+f.ci_low_pct/100), predHi=t0*(1+f.ci_high_pct/100), pred=t0*(1+f.expected_return_pct/100);
+  const sc=cell.scored, act=sc&&sc.actual_close;
+  let vals=closes.concat([predLo,predHi,pred]); if(act)vals.push(act);
+  const lo=Math.min(...vals),hi=Math.max(...vals),rng=(hi-lo)||1;
+  const n=closes.length, xstep=(W-2*pad)/(n+1), Y=v=>H-pad-((v-lo)/rng)*(H-2*pad);
+  g.clearRect(0,0,W,H);
+  // CI band at the +1 slot
+  const xp=pad+(n)*xstep;
+  g.fillStyle='rgba(245,158,11,.12)';g.fillRect(xp-3*DPR,Y(predHi),(W-pad)-(xp-3*DPR),Y(predLo)-Y(predHi));
+  // price line
+  g.strokeStyle='#cdbfa0';g.lineWidth=1.5*DPR;g.beginPath();
+  closes.forEach((v,i)=>{const x=pad+i*xstep,y=Y(v);i?g.lineTo(x,y):g.moveTo(x,y);});g.stroke();
+  // predicted point
+  g.fillStyle=f.consensus_lean==='long'?'#22c55e':f.consensus_lean==='short'?'#ef4444':'#a39c8e';
+  g.beginPath();g.arc(xp,Y(pred),3.5*DPR,0,7);g.fill();
+  // actual
+  if(act){g.fillStyle=sc.direction_correct?'#22c55e':'#ef4444';g.beginPath();g.arc(xp,Y(act),3.5*DPR,0,7);g.fill();
+    g.strokeStyle=g.fillStyle;g.beginPath();g.moveTo(pad+(n-1)*xstep,Y(t0));g.lineTo(xp,Y(act));g.stroke();}
+}
+
+// ---- track record ----
+function scoredOrdered(){
+  const out=[]; D.dates.forEach(d=>{const cs=D.cells[d];Object.keys(cs).sort().forEach(t=>{const sc=cs[t].scored;
+    if(sc&&sc.direction_correct!=null)out.push({d,t,ok:sc.direction_correct,bl:sc.baseline_dir_correct});});});return out;}
+function drawTimeline(){
+  const c=document.getElementById('timeline'),g=c.getContext('2d');c.width=c.clientWidth*DPR;c.height=c.clientHeight*DPR;
+  const rows=scoredOrdered();const W=c.width,H=c.height,pad=22*DPR; g.clearRect(0,0,W,H);
+  g.strokeStyle='rgba(255,238,210,.12)';g.lineWidth=1;const y50=H-pad-0.5*(H-2*pad);
+  g.setLineDash([4,4]);g.beginPath();g.moveTo(pad,y50);g.lineTo(W-pad,y50);g.stroke();g.setLineDash([]);
+  g.fillStyle='#6a6253';g.font=(10*DPR)+'px JetBrains Mono';g.fillText('50% 抛硬币',pad,y50-4*DPR);
+  if(!rows.length)return;
+  let h=0;const pts=rows.map((r,i)=>{h+=r.ok?1:0;return (h/(i+1));});
+  const n=pts.length,xstep=(W-2*pad)/Math.max(1,n-1),Y=v=>H-pad-v*(H-2*pad);
+  g.strokeStyle='#fcd34d';g.lineWidth=2*DPR;g.beginPath();
+  pts.forEach((v,i)=>{const x=pad+i*xstep,y=Y(v);i?g.lineTo(x,y):g.moveTo(x,y);});g.stroke();
+  pts.forEach((v,i)=>{g.fillStyle=rows[i].ok?'#22c55e':'#ef4444';g.beginPath();g.arc(pad+i*xstep,Y(v),3*DPR,0,7);g.fill();});
+}
+function sbNums(){
+  const sb=D.scoreboard; const el=document.getElementById('sbNums'),note=document.getElementById('sbNote');
+  if(!sb||!sb.overall||sb.overall.n_directional===0){el.innerHTML='<div class="sbn"><div class="v">—</div><div class="k">暂无已评分</div></div>';note.textContent='';return;}
+  const o=sb.overall,bl=sb.baseline;
+  el.innerHTML=
+    `<div class="sbn"><div class="v">${(o.hit_rate*100).toFixed(0)}%</div><div class="k">群体命中 (${o.hits}/${o.n_directional})</div></div>`+
+    `<div class="sbn"><div class="v">[${(o.hit_ci95[0]*100).toFixed(0)},${(o.hit_ci95[1]*100).toFixed(0)}]</div><div class="k">命中95%CI</div></div>`+
+    `<div class="sbn"><div class="v">${o.ci_calibration!=null?(o.ci_calibration*100).toFixed(0)+'%':'—'}</div><div class="k">落入CI</div></div>`+
+    `<div class="sbn"><div class="v">${bl?(bl.hit_rate*100).toFixed(0)+'%':'—'}</div><div class="k">基准命中 (对照)</div></div>`;
+  note.textContent = o.coinflip_excluded? '命中率置信区间已不含 50% —— 出现可分辨的方向性。'
+    : `仅 ${o.n_directional} 个已评分观测,命中率 CI 仍横跨 50% —— 统计上还分不出和抛硬币的区别。前向测试要几十个交易日才有意义。`;
+}
+
+// ---- boot ----
+function boot(){
+  if(!D||!D.dates||!D.dates.length){document.querySelector('.wrap').innerHTML='<p style="color:var(--muted);padding:40px 0">还没有数据。先跑 <code>python -m forward_v01.export_viz</code>。</p>';return;}
+  state.date=D.dates[D.dates.length-1];
+  const ts=Object.keys(D.cells[state.date]).sort(); state.ticker=ts[0];
+  sizeCanvas(); render(); loop();
+}
+window.addEventListener('resize',()=>{sizeCanvas();drawSpark(D.cells[state.date][state.ticker]);drawTimeline();});
+boot();
+</script>
+</body>
+</html>
