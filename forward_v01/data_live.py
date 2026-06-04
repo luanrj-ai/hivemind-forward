@@ -46,7 +46,7 @@ _trend = _avd._trend
 _PRICE_MEMO: dict[str, pd.DataFrame] = {}  # per-process: one fetch per ticker/run
 
 
-def _live_prices(ticker: str, retries: int = 3) -> pd.DataFrame:
+def _live_prices(ticker: str, retries: int = 5) -> pd.DataFrame:
     """Full daily OHLCV up to the latest bar. Fetches FRESH from yfinance
     (use_cache=False → newest close), with retry/backoff for yfinance's frequent
     transient failures. Falls back to the parquet cache if the live fetch keeps
@@ -85,7 +85,9 @@ def _live_prices(ticker: str, retries: int = 3) -> pd.DataFrame:
                 df = _norm(df)
                 print(f"  ⚠ {ticker}: live fetch failed, using CACHED prices "
                       f"(latest {df.index[-1]}) — {last_err}")
-                _PRICE_MEMO[ticker] = df
+                # Do NOT memoize a stale fallback: a later call in the same run
+                # (e.g. Phase 2 after Phase 1) must be free to retry live and get
+                # fresh data, instead of being stuck on yesterday's bar.
                 return df
         except Exception as e:
             last_err = e
