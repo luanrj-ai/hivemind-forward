@@ -1,0 +1,82 @@
+{
+  "overall": {
+    "n": 5,
+    "n_directional": 5,
+    "hits": 3,
+    "hit_rate": 0.6,
+    "hit_ci95": [
+      0.2307,
+      0.8824
+    ],
+    "coinflip_excluded": false,
+    "ci_calibration": 1.0,
+    "mae_pct": 2.1976
+  },
+  "per_ticker": {
+    "AAPL": {
+      "n": 1,
+      "n_directional": 1,
+      "hits": 1,
+      "hit_rate": 1.0,
+      "hit_ci95": [
+        0.2065,
+        1.0
+      ],
+      "coinflip_excluded": false,
+      "ci_calibration": 1.0,
+      "mae_pct": 1.162
+    },
+    "AMZN": {
+      "n": 1,
+      "n_directional": 1,
+      "hits": 1,
+      "hit_rate": 1.0,
+      "hit_ci95": [
+        0.2065,
+        1.0
+      ],
+      "coinflip_excluded": false,
+      "ci_calibration": 1.0,
+      "mae_pct": 2.238
+    },
+    "GOOGL": {
+      "n": 1,
+      "n_directional": 1,
+      "hits": 1,
+      "hit_rate": 1.0,
+      "hit_ci95": [
+        0.2065,
+        1.0
+      ],
+      "coinflip_excluded": false,
+      "ci_calibration": 1.0,
+      "mae_pct": 0.548
+    },
+    "MSFT": {
+      "n": 1,
+      "n_directional": 1,
+      "hits": 0,
+      "hit_rate": 0.0,
+      "hit_ci95": [
+        0.0,
+        0.7935
+      ],
+      "coinflip_excluded": false,
+      "ci_calibration": 1.0,
+      "mae_pct": 3.303
+    },
+    "NVDA": {
+      "n": 1,
+      "n_directional": 1,
+      "hits": 0,
+      "hit_rate": 0.0,
+      "hit_ci95": [
+        0.0,
+        0.7935
+      ],
+      "coinflip_excluded": false,
+      "ci_calibration": 1.0,
+      "mae_pct": 3.737
+    }
+  }
+}
