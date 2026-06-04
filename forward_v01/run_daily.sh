@@ -27,6 +27,8 @@ LOG="forward_v01/results/logs/run_$(date +%Y%m%d_%H%M).log"
   caffeinate -i "$REPO/.venv/bin/python" -m forward_v01.daily --agents 150 --model haiku
   echo "--- scoreboard ---"
   "$REPO/.venv/bin/python" -m forward_v01.scoreboard --json
+  echo "--- rebuild viz data ---"
+  "$REPO/.venv/bin/python" -m forward_v01.export_viz --date-stamp "$(date +%F)" || echo "WARN: export_viz failed"
 
   echo "--- commit & push results ---"
   # Add the whole results dir (logs are *.log → gitignored). Adding specific
@@ -39,5 +41,8 @@ LOG="forward_v01/results/logs/run_$(date +%Y%m%d_%H%M).log"
       -m "Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>"
     git push origin forward-predict || echo "WARN: push failed (results committed locally)"
   fi
+
+  echo "--- refresh public site (gh-pages) ---"
+  /bin/zsh "$REPO/forward_v01/publish_pages.sh" || echo "WARN: publish_pages failed"
   echo "=== $(date) — forward_v01 daily DONE ==="
 } >> "$LOG" 2>&1
