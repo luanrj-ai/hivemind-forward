@@ -13,7 +13,9 @@ crashing the run. Re-running daily.py later fills the gaps from cache + retries.
 """
 from __future__ import annotations
 
+import hashlib
 import os
+import random
 import sys
 import threading
 import time
@@ -75,29 +77,92 @@ def persona_system(p: dict) -> str:
     )
 
 
-def context_user(ctx: dict) -> str:
-    ind, tr = ctx["indicators"], ctx["trend"]
-    news = ctx["news_headlines"]
-    news_block = ("\n".join(f"- {h}" for h in news) if news
-                  else "(no fresh headlines today)")
-    return (
-        f"As of {ctx['date']}, {ctx['ticker']} closed at ${ctx['t0_close']}.\n"
-        f"Technicals: RSI14 {ind['rsi14']}, MACD-hist {ind['macd_hist']}, "
-        f"vs SMA20 {ind['pct_vs_sma20']:+.1f}%, 5d momentum {ind['mom_5d_pct']:+.1f}%, "
-        f"ann.vol {ind['ann_vol_pct']}%, {ind['pct_in_52w_range']:.0f}% of 52w range "
-        f"(Bollinger [{ind['bb_lower']}, {ind['bb_upper']}]).\n"
-        f"Trailing returns: 5d {tr['ret_5d_pct']}%, 20d {tr['ret_20d_pct']}%, 60d {tr['ret_60d_pct']}%.\n"
-        f"Today's news:\n{news_block}\n\n"
-        "Predict the NEXT TRADING DAY's move. Respond as JSON ONLY:\n"
-        '{"lean": "long|short|neutral", "conviction": 0.0-1.0, '
-        '"narrative": "one sentence, your actual reasoning"}'
-    )
+# ── information heterogeneity: each agent sees a DIFFERENT slice ──────────────
+# Gated by info_tier (1=retail … 5=institution), plus per-agent variation.
+# Retail sees price + a few headlines; mid adds technicals; institutions add
+# fundamentals + the recent price path + (if present) the TimesFM prior. The
+# per-agent RNG uses a STABLE hash (not Python's per-process hash) so each
+# agent's slice is identical across runs — otherwise prompts would change every
+# run and blow the LLM cache.
+def _agent_rng(pid: str) -> "random.Random":
+    seed = int(hashlib.md5(pid.encode()).hexdigest()[:8], 16)
+    return random.Random(seed)
+
+
+def _tech_block(ind: dict, tr: dict) -> str:
+    return (f"Technicals: RSI14 {ind['rsi14']}, MACD-hist {ind['macd_hist']}, "
+            f"vs SMA20 {ind['pct_vs_sma20']:+.1f}%, 5d momentum {ind['mom_5d_pct']:+.1f}%, "
+            f"ann.vol {ind['ann_vol_pct']}%, {ind['pct_in_52w_range']:.0f}% of 52w range "
+            f"(Bollinger [{ind['bb_lower']}, {ind['bb_upper']}]).\n"
+            f"Trailing returns: 5d {tr['ret_5d_pct']}%, 20d {tr['ret_20d_pct']}%, 60d {tr['ret_60d_pct']}%.")
+
+
+def _fund_block(f: dict) -> str:
+    if not f:
+        return ""
+    p = []
+    if f.get("trailing_pe"): p.append(f"P/E {f['trailing_pe']:.1f}")
+    if f.get("forward_pe"): p.append(f"fwd P/E {f['forward_pe']:.1f}")
+    if f.get("revenue_growth_pct") is not None: p.append(f"rev growth {f['revenue_growth_pct']}%")
+    if f.get("earnings_growth_pct") is not None: p.append(f"EPS growth {f['earnings_growth_pct']}%")
+    if f.get("profit_margin_pct") is not None: p.append(f"net margin {f['profit_margin_pct']}%")
+    if f.get("beta"): p.append(f"beta {f['beta']:.2f}")
+    return ("Fundamentals: " + ", ".join(p) + ".") if p else ""
+
+
+def _path_block(pw: list) -> str:
+    if not pw or len(pw) < 10:
+        return ""
+    last = pw[-10:]
+    return "Recent closes (last 10d): " + ", ".join(f"{p['close']:.1f}" for p in last) + "."
+
+
+def _tsfm_block(ts: dict) -> str:
+    if not ts:
+        return ""
+    return (f"Time-series model (TimesFM) next-day forecast: mean {ts['mean_pct']:+.2f}%, "
+            f"80% range [{ts['q10_pct']:+.2f}%, {ts['q90_pct']:+.2f}%].")
+
+
+def _news_block(headlines: list, rng, k: int) -> str:
+    if not headlines:
+        return "(no fresh headlines today)"
+    hs = headlines[:]
+    rng.shuffle(hs)               # each agent reads a different subset/order
+    pick = hs[:max(1, min(k, len(hs)))]
+    return "\n".join(f"- {h}" for h in pick)
+
+
+def build_user(persona: dict, ctx: dict) -> str:
+    tier = int(persona.get("info_tier", 1))
+    rng = _agent_rng(persona["pid"])
+    # asymmetric within-tier variation: a few retail/mid agents occasionally see
+    # one tier up (savvy/lucky); institutions (tier>=4) always see everything.
+    eff = tier
+    if tier <= 2 and rng.random() < 0.15:
+        eff = 3
+
+    lines = [f"As of {ctx['date']}, {ctx['ticker']} closed at ${ctx['t0_close']}."]
+    if eff >= 3:
+        lines.append(_tech_block(ctx["indicators"], ctx["trend"]))
+    if eff >= 4:
+        for blk in (_fund_block(ctx.get("fundamentals")),
+                    _path_block(ctx.get("price_window")),
+                    _tsfm_block(ctx.get("tsfm"))):
+            if blk:
+                lines.append(blk)
+    k = 8 if eff >= 4 else 5 if eff == 3 else 3
+    lines.append("Today's news:\n" + _news_block(ctx["news_headlines"], rng, k))
+    lines.append('\nPredict the NEXT TRADING DAY\'s move. Respond as JSON ONLY:\n'
+                 '{"lean": "long|short|neutral", "conviction": 0.0-1.0, '
+                 '"narrative": "one sentence, your actual reasoning"}')
+    return "\n".join(lines)
 
 
 # ── single-persona reasoning ─────────────────────────────────────────────────
 def think(persona: dict, ctx: dict, model: str = MODEL, use_cache: bool = True) -> dict:
     system = persona_system(persona)
-    user = context_user(ctx)
+    user = build_user(persona, ctx)
     out, _cost = llm.ask_json(system, user, model=model, use_cache=use_cache)
     return _parse(out, persona)
 

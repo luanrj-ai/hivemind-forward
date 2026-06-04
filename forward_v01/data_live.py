@@ -130,6 +130,14 @@ def context(ticker: str, date: str, lookback: int = 60) -> dict:
     window = upto.tail(lookback)
     price_window = [{"date": str(i), "close": round(float(c), 2)}
                     for i, c in window["close"].items()]
+
+    # Fundamentals (institutional tier only). yfinance .info is point-in-time NOW
+    # — legitimate for a forward (today→tomorrow) prediction; fetched once/ticker.
+    try:
+        fund = _avd.fundamentals(ticker)
+    except Exception:
+        fund = {}
+
     return {
         "ticker": ticker,
         "date": str(t0),
@@ -138,6 +146,7 @@ def context(ticker: str, date: str, lookback: int = 60) -> dict:
         "trend": _trend(closes),
         "news_headlines": head,
         "price_window": price_window,
+        "fundamentals": fund,
     }
 
 
