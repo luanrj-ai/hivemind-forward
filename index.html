@@ -139,6 +139,7 @@
     <div class="brand"><span class="hex">⬡</span> Hivemind <span style="color:var(--v2)">Forward</span></div>
     <div class="navlinks">
       <a href="#how">如何运作</a>
+      <a href="#market">价格形成</a>
       <a href="#about">关于</a>
       <a href="#track">战绩</a>
       <a href="explore.html">探索蜂巢</a>
@@ -176,6 +177,35 @@
       <div class="step"><div class="n">03</div><h3>群体涌现</h3><p>agent 沿带符号的影响力网络相互带动——羊群与逆向在数学上涌现，不是脚本写死的。</p></div>
       <div class="step"><div class="n">04</div><h3>聚合成预测</h3><p>按资本 × 影响力 × 时间尺度加权，得出次日预期收益 + 锚定真实波动率的 95% 区间。</p></div>
       <div class="step"><div class="n">05</div><h3>第二天评分</h3><p>用真实收盘对比：方向命中？落在区间内？误差多少？记入永久、可复现的战绩。</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- #3 MARKET -->
+<section class="block" id="market">
+  <div class="wrap">
+    <div class="kicker">价格形成 · Price emerges from order flow</div>
+    <h2>价格不是投票投出来的,是撮合撮出来的</h2>
+    <p class="lead">大多数"AI 群体预测"把每个 agent 的观点<b>加权平均</b>成一个数。但真实市场里没人在算平均——<b>每个人下单,订单簿撮合,价格从供需交叉处涌现</b>。</p>
+    <div class="cards">
+      <div class="card">
+        <div class="tag"><span class="ic">▤</span> 每个 agent → 一张限价单</div>
+        <h3>多头买、空头卖</h3>
+        <p>有资本的 agent 把判断变成订单:多头是<span class="hl">买方</span>(愿付到自己的保留价)、空头是<span class="hl">卖方</span>。下单量 ∝ <b>√资本 × 信念</b>——机构主导价格冲击,但不绝对碾压人群。经济学家只发声、不下单。</p>
+      </div>
+      <div class="card">
+        <div class="tag"><span class="ic">✕</span> 供需曲线交叉</div>
+        <h3>出清价 = 涌现价</h3>
+        <p>一轮<b>集合竞价</b>找到供需相等、成交量最大的那个价。再加一层做市商/指数<b>被动流动性</b>给订单簿深度。<span class="hl">涌现收益 = 出清价 / 今收 − 1</span>。它对保留价的<b>分布</b>敏感,不是均值——一撮激进卖方就能把价格钉住。</p>
+      </div>
+      <div class="card">
+        <div class="tag"><span class="ic">⊞</span> 三个预测器同台</div>
+        <h3>谁更准,数据说</h3>
+        <p>同一个零泄露前向测试里,<b>群体共识</b>(加权平均)、<b>市场出清</b>(#3 涌现)、<b>非 LLM 基准</b>三者<span class="hl">分别打分</span>。到底是"平均观点"还是"撮合价格"更接近明天,让命中率自己回答。</p>
+      </div>
+    </div>
+    <div class="cta" style="margin-top:36px">
+      <a class="btn btn-primary" href="explore.html#market">看订单簿撮合 →</a>
     </div>
   </div>
 </section>

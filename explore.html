@@ -73,6 +73,7 @@
   .arch .track{height:8px;background:rgba(255,255,255,.05);border-radius:5px;position:relative;overflow:hidden}
   .arch .fill{position:absolute;top:0;bottom:0}
   #spark{display:block;width:100%;height:120px}
+  #book{display:block;width:100%;height:150px}
 
   .tl{margin-top:16px}
   #timeline{display:block;width:100%;height:150px}
@@ -126,6 +127,7 @@
           <div class="ci" id="fcCI"></div>
           <div class="votebar" id="voteBar"></div>
           <div class="row"><span>共识</span><b id="fcCons"></b></div>
+          <div class="row"><span>市场出清 (#3 涌现)</span><b id="fcMkt"></b></div>
           <div class="row"><span>基准 (非LLM)</span><b id="fcBase"></b></div>
           <div class="verdict" id="verdict"></div>
         </div>
@@ -134,6 +136,11 @@
       <div class="panel arch">
         <div class="ph"><span class="t">behavior · 各原型净倾向</span></div>
         <div class="pad" id="archBars"></div>
+      </div>
+
+      <div class="panel">
+        <div class="ph"><span class="t">order book · 供需曲线交叉 = 出清价</span></div>
+        <div class="pad"><canvas id="book"></canvas></div>
       </div>
 
       <div class="panel">
@@ -271,14 +278,17 @@ function render(){
     `<div class="bar-s" style="width:${f.n_short/tot*100}%">${f.n_short||''}</div>`+
     `<div class="bar-n" style="width:${f.n_neutral/tot*100}%">${f.n_neutral||''}</div>`;
   document.getElementById('fcCons').textContent=`${f.consensus_lean} (${(f.consensus_strength*100|0)}%) · ${f.n_votes}票`;
+  const mk=cell.market;
+  document.getElementById('fcMkt').textContent=mk?`${mk.return_pct>=0?'+':''}${mk.return_pct}% · 出清$${mk.clear_price} (${mk.n_buyers}买/${mk.n_sellers}卖)`:'—';
   document.getElementById('fcBase').textContent=cell.baseline?`${cell.baseline.mean_pct>=0?'+':''}${cell.baseline.mean_pct}% [${cell.baseline.model}]`:'—';
   // verdict
   const v=document.getElementById('verdict'); const sc=cell.scored;
   if(sc&&sc.actual_return_pct!=null){const ok=sc.direction_correct;
     v.className='verdict '+(ok?'v-ok':'v-no');
-    v.innerHTML=`<span>实际 ${sc.actual_return_pct>=0?'+':''}${sc.actual_return_pct}% (${sc.target_date})</span><b>${ok?'方向 ✓':'方向 ✗'} · ${sc.in_ci?'in-CI':'out-CI'}</b>`;
+    const mkv=sc.market_dir_correct==null?'':` · 市场 ${sc.market_dir_correct?'✓':'✗'}`;
+    v.innerHTML=`<span>实际 ${sc.actual_return_pct>=0?'+':''}${sc.actual_return_pct}% (${sc.target_date})</span><b>共识 ${ok?'✓':'✗'}${mkv}</b>`;
   }else{v.className='verdict v-pend';v.innerHTML='<span>等次日收盘评分…</span><b>pending</b>';}
-  archBars(cell); drawSpark(cell); buildGraph(cell); paintNodes();
+  archBars(cell); drawSpark(cell); drawBook(cell); buildGraph(cell); paintNodes();
   drawTimeline(); sbNums();
 }
 function nodesLabel(cell){const n=cell.views?cell.views.length:(cell.forecast.n_votes||0);return `${n} agents · ${edges.length||''} ties`;}
@@ -321,6 +331,27 @@ function drawSpark(cell){
     g.strokeStyle=g.fillStyle;g.beginPath();g.moveTo(pad+(n-1)*xstep,Y(t0));g.lineTo(xp,Y(act));g.stroke();}
 }
 
+function drawBook(cell){
+  const c=document.getElementById('book'),g=c.getContext('2d');c.width=c.clientWidth*DPR;c.height=c.clientHeight*DPR;
+  g.clearRect(0,0,c.width,c.height);
+  const mk=cell.market, cur=mk&&mk.curve;
+  if(!cur||!cur.length){g.fillStyle='#6a6253';g.font=(11*DPR)+'px JetBrains Mono';g.fillText('这一天无逐 agent 订单',12*DPR,24*DPR);return;}
+  const W=c.width,H=c.height,pad=12*DPR;
+  const xs=cur.map(r=>r[0]),x0=Math.min(...xs),x1=Math.max(...xs);
+  const maxV=Math.max(1,...cur.map(r=>Math.max(r[1],r[2])));
+  const X=v=>pad+(v-x0)/(x1-x0)*(W-2*pad), Y=v=>H-pad-(v/maxV)*(H-2*pad);
+  g.strokeStyle='rgba(255,238,210,.12)';g.lineWidth=1;g.beginPath();g.moveTo(X(0),pad);g.lineTo(X(0),H-pad);g.stroke();
+  const line=(idx,col)=>{g.strokeStyle=col;g.lineWidth=2*DPR;g.beginPath();cur.forEach((r,i)=>{const x=X(r[0]),y=Y(r[idx]);i?g.lineTo(x,y):g.moveTo(x,y);});g.stroke();};
+  line(1,'#22c55e'); line(2,'#ef4444');                 // demand / supply
+  const cp=mk.return_pct;
+  g.strokeStyle='#fcd34d';g.lineWidth=1.5*DPR;g.setLineDash([4,3]);
+  g.beginPath();g.moveTo(X(cp),pad);g.lineTo(X(cp),H-pad);g.stroke();g.setLineDash([]);
+  g.fillStyle='#fcd34d';g.font=(10*DPR)+'px JetBrains Mono';
+  g.fillText(`出清 ${cp>=0?'+':''}${cp}%`,Math.min(W-66*DPR,X(cp)+4*DPR),pad+11*DPR);
+  g.fillStyle='#22c55e';g.fillText('需求(买)',pad,H-3*DPR);
+  g.fillStyle='#ef4444';g.fillText('供给(卖)',pad+68*DPR,H-3*DPR);
+}
+
 // ---- track record ----
 function scoredOrdered(){
   const out=[]; D.dates.forEach(d=>{const cs=D.cells[d];Object.keys(cs).sort().forEach(t=>{const sc=cs[t].scored;
@@ -341,12 +372,12 @@ function drawTimeline(){
 function sbNums(){
   const sb=D.scoreboard; const el=document.getElementById('sbNums'),note=document.getElementById('sbNote');
   if(!sb||!sb.overall||sb.overall.n_directional===0){el.innerHTML='<div class="sbn"><div class="v">—</div><div class="k">暂无已评分</div></div>';note.textContent='';return;}
-  const o=sb.overall,bl=sb.baseline;
+  const o=sb.overall,bl=sb.baseline,mk=sb.market;
   el.innerHTML=
-    `<div class="sbn"><div class="v">${(o.hit_rate*100).toFixed(0)}%</div><div class="k">群体命中 (${o.hits}/${o.n_directional})</div></div>`+
-    `<div class="sbn"><div class="v">[${(o.hit_ci95[0]*100).toFixed(0)},${(o.hit_ci95[1]*100).toFixed(0)}]</div><div class="k">命中95%CI</div></div>`+
-    `<div class="sbn"><div class="v">${o.ci_calibration!=null?(o.ci_calibration*100).toFixed(0)+'%':'—'}</div><div class="k">落入CI</div></div>`+
-    `<div class="sbn"><div class="v">${bl?(bl.hit_rate*100).toFixed(0)+'%':'—'}</div><div class="k">基准命中 (对照)</div></div>`;
+    `<div class="sbn"><div class="v">${(o.hit_rate*100).toFixed(0)}%</div><div class="k">群体共识命中 (${o.hits}/${o.n_directional})</div></div>`+
+    `<div class="sbn"><div class="v">${mk?(mk.hit_rate*100).toFixed(0)+'%':'—'}</div><div class="k">市场出清命中 (#3)</div></div>`+
+    `<div class="sbn"><div class="v">${bl?(bl.hit_rate*100).toFixed(0)+'%':'—'}</div><div class="k">基准命中 (非LLM)</div></div>`+
+    `<div class="sbn"><div class="v">${o.ci_calibration!=null?(o.ci_calibration*100).toFixed(0)+'%':'—'}</div><div class="k">落入95%CI</div></div>`;
   note.textContent = o.coinflip_excluded? '命中率置信区间已不含 50% —— 出现可分辨的方向性。'
     : `仅 ${o.n_directional} 个已评分观测,命中率 CI 仍横跨 50% —— 统计上还分不出和抛硬币的区别。前向测试要几十个交易日才有意义。`;
 }
@@ -358,7 +389,7 @@ function boot(){
   const ts=Object.keys(D.cells[state.date]).sort(); state.ticker=ts[0];
   sizeCanvas(); render(); loop();
 }
-window.addEventListener('resize',()=>{sizeCanvas();drawSpark(D.cells[state.date][state.ticker]);drawTimeline();});
+window.addEventListener('resize',()=>{sizeCanvas();const c=D.cells[state.date][state.ticker];drawSpark(c);drawBook(c);drawTimeline();});
 boot();
 </script>
 </body>
