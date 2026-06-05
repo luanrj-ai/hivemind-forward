@@ -21,6 +21,7 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE.parent))
 from forward_v01 import scoreboard as sb  # noqa: E402
 from forward_v01 import data_live          # noqa: E402
+from forward_v01 import market             # noqa: E402
 
 RESULTS = HERE / "results"
 VIEWS = RESULTS / "views"
@@ -59,6 +60,7 @@ def _views(date, ticker):
 def build(date_stamp: str | None) -> dict:
     pop = json.load(open(RESULTS / "population.json"))
     personas = [{k: p.get(k) for k in PERSONA_FIELDS} for p in pop["personas"]]
+    by_pid = {p["pid"]: p for p in pop["personas"]}
 
     scored = _read_jsonl("scored.jsonl")
     pending = _read_jsonl("pending.jsonl")
@@ -72,12 +74,19 @@ def build(date_stamp: str | None) -> dict:
         d, t = r["as_of_date"], r["ticker"]
         dates.add(d); tickers.add(t)
         sc = scored_idx.get((d, t))
+        vws = _views(d, t)
+        # recompute the call-auction clearing (with supply/demand curve) for the
+        # explorer; stored record only keeps the summary (no curve).
+        mkt = None
+        if vws:
+            mkt = market.clearing(vws, by_pid, r["t0_close"], r["forecast"].get("daily_vol_pct"))
         cells.setdefault(d, {})[t] = {
             "t0_close": r["t0_close"],
             "forecast": r["forecast"],
             "baseline": r.get("baseline"),
+            "market": mkt,
             "price_window": _price_window(t, d),
-            "views": _views(d, t),
+            "views": vws,
             "scored": None if not sc else {
                 "target_date": sc.get("target_date"),
                 "actual_close": sc.get("actual_close"),
@@ -85,6 +94,7 @@ def build(date_stamp: str | None) -> dict:
                 "direction_correct": sc.get("direction_correct"),
                 "in_ci": sc.get("in_ci"),
                 "baseline_dir_correct": sc.get("baseline_dir_correct"),
+                "market_dir_correct": sc.get("market_dir_correct"),
             },
         }
 

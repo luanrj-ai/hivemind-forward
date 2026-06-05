@@ -66,6 +66,18 @@ def _baseline_stats(rows: list[dict]) -> dict | None:
             "model": next((r["baseline"]["model"] for r in bl if r.get("baseline")), "?")}
 
 
+def _model_stats(rows: list[dict], flag: str, err: str, label: str) -> dict | None:
+    sub = [r for r in rows if flag in r]
+    if not sub:
+        return None
+    n = len(sub)
+    hits = sum(1 for r in sub if r[flag])
+    lo, hi = wilson(hits, n)
+    mae = sum(r.get(err, 0) for r in sub) / n
+    return {"n": n, "hits": hits, "hit_rate": round(hits / n, 4),
+            "hit_ci95": [round(lo, 4), round(hi, 4)], "mae_pct": round(mae, 4), "label": label}
+
+
 def build(rows: list[dict]) -> dict:
     overall = _stats(rows)
     per_ticker = {}
@@ -74,7 +86,11 @@ def build(rows: list[dict]) -> dict:
         by_t[r["ticker"]].append(r)
     for t, rs in sorted(by_t.items()):
         per_ticker[t] = _stats(rs)
-    return {"overall": overall, "per_ticker": per_ticker, "baseline": _baseline_stats(rows)}
+    return {
+        "overall": overall, "per_ticker": per_ticker,
+        "baseline": _baseline_stats(rows),
+        "market": _model_stats(rows, "market_dir_correct", "market_abs_error_pct", "call-auction"),
+    }
 
 
 def _fmt(s: dict) -> str:
@@ -101,14 +117,19 @@ def main():
     sb = build(rows)
 
     print("=== forward_v01 scoreboard (leakage-free, walk-forward) ===")
-    print(f"CROWD     {_fmt(sb['overall'])}")
+    print(f"CROWD     {_fmt(sb['overall'])}  ← weighted opinion consensus")
+    mk = sb.get("market")
+    if mk:
+        lo, hi = mk["hit_ci95"]
+        print(f"MARKET    n={mk['n']:<4} dir={mk['n']:<4} "
+              f"hit={mk['hit_rate']*100:5.1f}% [{lo*100:4.1f},{hi*100:4.1f}]  "
+              f"{'(call-auction clearing)':<26} {'':5} MAE={mk['mae_pct']:.2f}%  ← #3 emergent price")
     bl = sb.get("baseline")
     if bl:
         lo, hi = bl["hit_ci95"]
         print(f"BASELINE  n={bl['n']:<4} dir={bl['n']:<4} "
               f"hit={bl['hit_rate']*100:5.1f}% [{lo*100:4.1f},{hi*100:4.1f}]  "
-              f"{'model='+bl['model']:<26} {'':5} MAE={bl['mae_pct']:.2f}%  "
-              f"← non-LLM benchmark")
+              f"{'model='+bl['model']:<26} {'':5} MAE={bl['mae_pct']:.2f}%  ← non-LLM benchmark")
     print("per ticker:")
     for t, s in sb["per_ticker"].items():
         print(f"  {t:<6} {_fmt(s)}")

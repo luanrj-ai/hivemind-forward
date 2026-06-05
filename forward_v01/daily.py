@@ -21,7 +21,7 @@ import os
 import sys
 from pathlib import Path
 
-from forward_v01 import aggregate, baseline, data_live, population
+from forward_v01 import aggregate, baseline, data_live, market, population
 from forward_v01.agent_think import think_population, MODEL
 
 RESULTS = Path(__file__).resolve().parent / "results"
@@ -88,6 +88,10 @@ def score_pending() -> tuple[int, int]:
         if bl:
             rec["baseline_dir_correct"] = _dir(bl["mean_pct"]) == _dir(actual_pct)
             rec["baseline_abs_error_pct"] = round(abs(actual_pct - bl["mean_pct"]), 3)
+        mk = rec.get("market")
+        if mk:
+            rec["market_dir_correct"] = _dir(mk["return_pct"]) == _dir(actual_pct)
+            rec["market_abs_error_pct"] = round(abs(actual_pct - mk["return_pct"]), 3)
         _append(SCORED, rec)
         scored_now += 1
         print(f"  scored {tkr} {as_of}→{target_date}: pred {exp:+.2f}% "
@@ -103,6 +107,7 @@ def predict_today(date: str | None, tickers: list[str], agents: int,
     pop = population.load_population(agents if agents else 300)
     personas = pop["personas"][:agents] if agents else pop["personas"]
     edges = pop["edges"]
+    by_pid = {p["pid"]: p for p in pop["personas"]}
 
     pending = _read(PENDING)
     out = []
@@ -125,6 +130,9 @@ def predict_today(date: str | None, tickers: list[str], agents: int,
         daily_vol = (ctx["indicators"].get("ann_vol_pct") or 0) / (252 ** 0.5)
         fc = aggregate.aggregate(views, personas, edges, target_horizon=horizon,
                                  daily_vol_pct=daily_vol)
+        # #3 price formation: clear a call auction from the agents' orders.
+        mk = market.clearing(views, by_pid, ctx["t0_close"], daily_vol)
+        mk_store = {k: v for k, v in mk.items() if k != "curve"}  # curve recomputed for viz
 
         # Quota guard: if too many agents abstained (claude window exhausted),
         # this isn't a real forecast — skip it (don't pollute pending/scoreboard).
@@ -139,6 +147,7 @@ def predict_today(date: str | None, tickers: list[str], agents: int,
             "t0_close": ctx["t0_close"], "model": model, "n_agents": len(personas),
             "n_headlines": len(ctx["news_headlines"]),
             "forecast": fc,
+            "market": mk_store,  # #3 emergent clearing price from order flow
             "baseline": bl,  # non-LLM benchmark forecast for this same day
             "sample_narratives": [v["narrative"] for v in views[:5] if v.get("narrative")],
         }
@@ -153,10 +162,11 @@ def predict_today(date: str | None, tickers: list[str], agents: int,
         pending.append(rec)
         out.append(rec)
         arrow = "↑" if fc["consensus_lean"] == "long" else "↓" if fc["consensus_lean"] == "short" else "→"
-        print(f"    => T+{horizon} {arrow} {fc['expected_return_pct']:+.2f}% "
+        print(f"    => crowd {arrow} {fc['expected_return_pct']:+.2f}% "
               f"[{fc['ci_low_pct']:+.2f}, {fc['ci_high_pct']:+.2f}]  "
-              f"L/S/N={fc['n_long']}/{fc['n_short']}/{fc['n_neutral']} "
-              f"abstain={fc['n_abstain']}")
+              f"| market(clear) {mk_store['return_pct']:+.2f}% "
+              f"({mk_store['n_buyers']}b/{mk_store['n_sellers']}s)  "
+              f"L/S/N={fc['n_long']}/{fc['n_short']}/{fc['n_neutral']} abstain={fc['n_abstain']}")
     _write(PENDING, pending)
     return out
 
