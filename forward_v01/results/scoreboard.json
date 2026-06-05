@@ -89,5 +89,16 @@
     ],
     "mae_pct": 1.4642,
     "model": "naive-drift-vol"
+  },
+  "market": {
+    "n": 5,
+    "hits": 4,
+    "hit_rate": 0.8,
+    "hit_ci95": [
+      0.3755,
+      0.9638
+    ],
+    "mae_pct": 1.2222,
+    "label": "call-auction"
   }
 }
