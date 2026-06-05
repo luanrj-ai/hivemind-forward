@@ -3,60 +3,77 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Hivemind Forward — 一页纸 (产品会 / 方法论)</title>
+<title>Hivemind Forward · 产品思考一页纸</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet" />
 <style>
   :root{--bg:#07060b;--bg2:#100c12;--ink:#f7f4ec;--muted:#a39c8e;--faint:#6a6253;
-    --up:#22c55e;--down:#ef4444;--v1:#f59e0b;--v2:#fcd34d;--border:rgba(255,238,210,.12);--card:rgba(18,13,9,.66)}
+    --up:#22c55e;--down:#ef4444;--v1:#f59e0b;--v2:#fcd34d;--border:rgba(255,238,210,.12);--card:rgba(18,13,9,.7)}
   *{margin:0;padding:0;box-sizing:border-box}
   body{background:var(--bg);color:var(--ink);font-family:"Noto Sans SC","Space Grotesk",system-ui,sans-serif;
-    -webkit-font-smoothing:antialiased;line-height:1.6}
+    -webkit-font-smoothing:antialiased;line-height:1.5}
   .mono{font-family:"JetBrains Mono",monospace}
   a{color:var(--v2);text-decoration:none}
-  .wrap{max-width:980px;margin:0 auto;padding:40px 28px 70px}
   nav{position:sticky;top:0;z-index:20;background:rgba(7,6,11,.85);backdrop-filter:blur(10px);border-bottom:1px solid var(--border)}
-  .navinner{max-width:980px;margin:0 auto;padding:12px 28px;display:flex;justify-content:space-between;align-items:center;font-size:.85rem}
+  .navinner{max-width:1080px;margin:0 auto;padding:11px 26px;display:flex;justify-content:space-between;align-items:center;font-size:.84rem}
   .brand{font-weight:700;font-family:"Space Grotesk",sans-serif}.brand b{color:var(--v2)}
-  .navinner .r{display:flex;gap:18px;color:var(--muted)}
-  .head{border-bottom:1px solid var(--border);padding-bottom:22px;margin-bottom:8px}
-  .eyebrow{font-family:"JetBrains Mono",monospace;font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;color:var(--v2)}
-  h1{font-size:clamp(1.7rem,3.4vw,2.4rem);font-weight:700;letter-spacing:-.02em;margin:10px 0 8px;font-family:"Space Grotesk","Noto Sans SC",sans-serif}
-  .tagline{color:var(--muted);font-size:1.02rem;max-width:760px}
-  .tagline b{color:var(--ink)}
-  .mission{margin:18px 0 6px;padding:13px 16px;border-left:3px solid var(--v1);background:rgba(245,158,11,.06);border-radius:0 10px 10px 0;font-size:.92rem;color:var(--muted)}
-  .mission b{color:var(--ink)}
+  .navinner .r{display:flex;gap:16px;color:var(--muted)}
+  .wrap{max-width:1080px;margin:0 auto;padding:30px 26px 60px}
 
-  section.q{padding:26px 0;border-bottom:1px solid var(--border)}
-  .qh{display:flex;align-items:baseline;gap:12px;margin-bottom:12px}
-  .qn{font-family:"JetBrains Mono",monospace;font-weight:700;color:var(--v2);font-size:1.05rem}
-  h2{font-size:1.22rem;font-weight:700;font-family:"Space Grotesk","Noto Sans SC",sans-serif}
-  p{margin:9px 0;font-size:.95rem}
-  p b{color:var(--ink)} .hl{color:var(--v2);font-weight:600}
-  ul{margin:8px 0 8px 4px;list-style:none}
-  li{position:relative;padding-left:18px;margin:7px 0;font-size:.93rem;color:var(--muted)}
-  li::before{content:"▸";position:absolute;left:0;color:var(--v1)}
-  li b{color:var(--ink)}
-  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:8px}
-  @media(max-width:760px){.grid2{grid-template-columns:1fr}}
-  .box{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:15px 17px}
-  .box h3{font-size:.95rem;font-weight:700;margin-bottom:8px}
-  .box .lbl{font-family:"JetBrains Mono",monospace;font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);margin-bottom:6px}
-  .metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin:12px 0}
-  .metrics .m{background:var(--card);padding:13px 14px}
-  .metrics .v{font-family:"JetBrains Mono",monospace;font-size:1.35rem;font-weight:700}
-  .metrics .k{font-size:.74rem;color:var(--muted);margin-top:3px}
-  @media(max-width:640px){.metrics{grid-template-columns:repeat(2,1fr)}}
-  .papers{font-size:.84rem;color:var(--muted);line-height:1.75}
-  .papers b{color:var(--ink)}
-  .fill{background:rgba(245,158,11,.05);border:1px dashed var(--border);border-radius:10px;padding:13px 16px;margin-top:10px;font-size:.9rem;color:var(--muted)}
-  .fill .tag{font-family:"JetBrains Mono",monospace;font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--v2)}
+  header{border-bottom:2px solid rgba(255,238,210,.2);padding-bottom:15px;margin-bottom:16px}
+  .eyebrow{font-family:"JetBrains Mono",monospace;font-size:.7rem;letter-spacing:.18em;text-transform:uppercase;color:var(--v2)}
+  h1{font-size:clamp(1.5rem,3vw,2rem);font-weight:700;letter-spacing:-.02em;line-height:1.15;margin:9px 0 7px;
+    font-family:"Space Grotesk","Noto Sans SC",sans-serif}
+  h1 .mk{background:linear-gradient(105deg,var(--v1),var(--v2));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  .sub{font-size:.92rem;color:var(--muted)}.sub b{color:var(--ink)}
+  .meta{font-family:"JetBrains Mono",monospace;font-size:.68rem;color:var(--faint);margin-top:9px;display:flex;gap:14px;flex-wrap:wrap}
+
+  .pitch{background:linear-gradient(180deg,rgba(245,158,11,.1),rgba(18,13,9,.5));border:1px solid var(--border);
+    border-radius:11px;padding:14px 17px;margin-bottom:18px;font-size:.92rem;line-height:1.55;color:var(--muted)}
+  .pitch b{color:var(--ink)} .pitch .k{color:var(--v2);font-weight:600}
+
+  section{margin-bottom:17px}
+  h2{font-size:1.02rem;font-weight:700;display:flex;align-items:center;gap:9px;padding-bottom:6px;
+    border-bottom:1px solid var(--border);margin-bottom:9px;font-family:"Space Grotesk","Noto Sans SC",sans-serif}
+  h2 .n{font-family:"JetBrains Mono",monospace;font-size:.74rem;background:var(--v1);color:#07060b;font-weight:700;
+    width:22px;height:22px;border-radius:6px;display:inline-grid;place-items:center;flex-shrink:0}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  @media(max-width:760px){.row2{grid-template-columns:1fr}}
+  p{font-size:.88rem;color:var(--muted);margin:4px 0}
+  .lbl{color:var(--v2);font-weight:600}
+  p b,li b{color:var(--ink)} .hl{color:var(--v2);font-weight:600}
+  ul{list-style:none;margin:5px 0}
+  li{font-size:.88rem;color:var(--muted);line-height:1.5;padding-left:16px;position:relative;margin:5px 0}
+  li::before{content:"";position:absolute;left:1px;top:8px;width:5px;height:5px;border-radius:50%;background:var(--v1)}
+  code{font-family:"JetBrains Mono",monospace;font-size:.8rem;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:4px;padding:0 4px}
+
+  .evi{background:rgba(245,158,11,.07);border-left:3px solid var(--v1);border-radius:0 8px 8px 0;
+    padding:9px 13px;font-size:.84rem;color:var(--muted);line-height:1.6}
+  .evi b{color:var(--ink)} .evi .t{font-weight:700;color:var(--v2)}
+
+  table{width:100%;border-collapse:separate;border-spacing:0;font-size:.82rem;border:1px solid var(--border);border-radius:8px;overflow:hidden}
+  th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--border)}
+  thead th{background:rgba(255,255,255,.03);color:var(--muted);font-size:.76rem;font-weight:600}
+  thead th.us{background:linear-gradient(105deg,var(--v1),var(--v2));color:#07060b}
+  td.k{font-weight:600;color:var(--ink)}
+  td.us{background:rgba(245,158,11,.1);color:var(--ink)}
+  tbody tr:last-child td{border-bottom:none}
+  .y{color:var(--up);font-weight:700}.o{color:var(--faint)}.part{color:var(--v2)}
+
+  .moat{background:rgba(245,158,11,.08);border:1.5px solid rgba(245,158,11,.4);border-radius:11px;padding:14px 17px}
+  .moat h2{border-bottom:1px solid rgba(245,158,11,.3)}
+  .metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin:9px 0}
+  .metrics .m{background:var(--card);padding:12px 13px}
+  .metrics .v{font-family:"JetBrains Mono",monospace;font-size:1.3rem;font-weight:700}
+  .metrics .k{font-size:.72rem;color:var(--muted);margin-top:3px}
+  @media(max-width:600px){.metrics{grid-template-columns:repeat(2,1fr)}}
   .caveat{color:var(--down);font-weight:600}
-  .diagram{margin:14px 0;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px}
-  svg{width:100%;height:auto;display:block}
-  .foot{color:var(--faint);font-size:.8rem;margin-top:24px;line-height:1.6}
-  @media print{nav{display:none}body{background:#fff;color:#111}.box,.metrics .m,.diagram{background:#fafafa}a{color:#a15c00}}
+  .probs{display:grid;grid-template-columns:1fr 1fr;gap:8px 18px}
+  @media(max-width:760px){.probs{grid-template-columns:1fr}}
+  .prob{font-size:.84rem;color:var(--muted);line-height:1.5}.prob b{color:var(--down)}.prob .how{color:var(--ink)}
+  footer{margin-top:18px;padding-top:12px;border-top:1px solid var(--border);font-family:"JetBrains Mono",monospace;font-size:.72rem;color:var(--faint);line-height:1.6}
+  @media print{nav{display:none}body{background:#fff;color:#111}.card,.metrics .m,table,.pitch,.evi,.moat{background:#fafafa}a{color:#a15c00}}
 </style>
 </head>
 <body>
@@ -66,118 +83,98 @@
 </div></nav>
 
 <div class="wrap">
-  <div class="head">
-    <div class="eyebrow">Product One-Pager · social intelligence / simulation</div>
-    <h1>用异质多 agent 市场模拟,做可验证、零泄露的预测</h1>
-    <p class="tagline">一群有信念、资本、信息差的 LLM「投资者」,它们的订单在集合竞价里<b>撮合出一个涌现价格</b>;每个交易日预测、<b>第二天用真实结果打分</b>。现做股票,方法可迁移到 polymarket 事件 / 调查。</p>
-    <div class="mission">对齐任务:在 social intelligence / simulation 方向,找一种<b>可验证、可复现、可展示、可商业化</b>的方法,系统性降低 AI 模拟与真实结果的误差——<b>至少比裸 LLM、普通 agent survey、人工猜测、小样本更准</b>。这一页正面回答:方向、差异化、做了什么、以及尚未解决的部分。</div>
+  <header>
+    <div class="eyebrow">产品思考一页纸 · Product Thinking</div>
+    <h1>Hivemind Forward — <span class="mk">前向、零泄露</span>的多 agent 市场预测器</h1>
+    <div class="sub">一群有信念、资本、信息差的 LLM「投资者」,订单撮合出<b>涌现价格</b>;每天预测、<b>第二天用真实结果打分</b>。现做股票,方法可迁移 polymarket / 调查。</div>
+    <div class="meta"><span>作者 _____</span><span>2026-06-05</span><span>github.com/luanrj-ai/hivemind-forward</span><span>v01 已上线</span></div>
+  </header>
+
+  <div class="pitch">
+    所有「AI 选股」都在<b>回测</b>上很赚——但 LLM 记得历史,那是<b>泄题</b>。我们只测「做出时还不存在的未来」:<span class="k">预测明天、次日对账</span>。抹掉训练数据里的答案后还剩的命中率,才可信。
   </div>
 
-  <!-- pipeline diagram -->
-  <div class="diagram">
-    <svg viewBox="0 0 920 150" role="img" aria-label="pipeline">
-      <defs>
-        <marker id="ar" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#f59e0b"/></marker>
-        <style>.bx{fill:rgba(18,13,9,.9);stroke:rgba(255,238,210,.18)}.tt{fill:#f7f4ec;font:600 12px 'Space Grotesk',sans-serif}.st{fill:#a39c8e;font:10px 'JetBrains Mono',monospace}.amber{fill:#fcd34d;font:600 11px 'JetBrains Mono',monospace}</style>
-      </defs>
-      <!-- boxes -->
-      <g>
-        <rect class="bx" x="6" y="40" width="120" height="56" rx="9"/><text class="tt" x="66" y="64" text-anchor="middle">真实数据</text><text class="st" x="66" y="80" text-anchor="middle">价格·指标·新闻 ≤今日</text>
-        <rect class="bx" x="160" y="40" width="130" height="56" rx="9"/><text class="tt" x="225" y="64" text-anchor="middle">150 异质 agent</text><text class="st" x="225" y="80" text-anchor="middle">分层信息·各自推理</text>
-        <rect class="bx" x="324" y="40" width="130" height="56" rx="9"/><text class="tt" x="389" y="64" text-anchor="middle">影响力网络</text><text class="st" x="389" y="80" text-anchor="middle">羊群/逆向 涌现</text>
-        <rect class="bx" x="488" y="40" width="130" height="56" rx="9"/><text class="tt" x="553" y="64" text-anchor="middle">集合竞价撮合</text><text class="st" x="553" y="80" text-anchor="middle">供需交叉=出清</text>
-        <rect class="bx" x="652" y="40" width="120" height="56" rx="9"/><text class="tt" x="712" y="64" text-anchor="middle">涌现价格 T+1</text><text class="st" x="712" y="80" text-anchor="middle">分布+95%CI</text>
-        <rect class="bx" x="806" y="40" width="108" height="56" rx="9" stroke="#22c55e"/><text class="tt" x="860" y="64" text-anchor="middle">次日打分</text><text class="st" x="860" y="80" text-anchor="middle">vs 真实·vs基准</text>
-      </g>
-      <!-- arrows -->
-      <g stroke="#f59e0b" stroke-width="1.5" marker-end="url(#ar)">
-        <line x1="126" y1="68" x2="158" y2="68"/><line x1="290" y1="68" x2="322" y2="68"/>
-        <line x1="454" y1="68" x2="486" y2="68"/><line x1="618" y1="68" x2="650" y2="68"/>
-        <line x1="772" y1="68" x2="804" y2="68"/>
-      </g>
-      <!-- leakage gap label -->
-      <text class="amber" x="789" y="26" text-anchor="middle">⟂ 隔夜 · 目标此刻不存在</text>
-      <line x1="789" y1="32" x2="789" y2="40" stroke="#fcd34d" stroke-dasharray="3,2"/>
-      <text class="st" x="460" y="128" text-anchor="middle">全链自动跑 · 零 lookahead · 零训练数据污染 · 可复现</text>
-    </svg>
-  </div>
-
-  <!-- Q1 -->
-  <section class="q">
-    <div class="qh"><span class="qn">Q1</span><h2>选什么方向?为什么?证据?</h2></div>
-    <p><b>方向:</b>不做「又一个回测很赚的 agent」,而做<span class="hl">前向、零泄露的多 agent 市场模拟预测器</span>——价格从一群异质 LLM 个体的订单流里涌现,每天对真实结果打分。</p>
-    <p><b>为什么(痛点):</b>整个领域都在 <b>backtest</b> 上报「AI 很准」。但 LLM 有训练截止日——让它「预测」历史,它可能<b>记得</b>真实结果,这不是预测,是<span class="hl">泄题</span>。于是几乎所有结论都分不清「真 edge」还是「在背答案」。<b>唯一可验证的检验是前向:预测一个做出时还不存在的未来,次日对账。</b>这正是「可验证 / 可复现」的缺口,也是 leader 要的「方法论」而非创意 demo。</p>
-    <p><b>证据:</b></p>
-    <ul>
-      <li>LLM 评测的<b>训练数据污染</b>是公认问题;走 out-of-sample / walk-forward 是金融 ML 的标准做法。</li>
-      <li>我们的前向初跑已产出诚实数字(见 Q3):市场出清方向命中 80% &gt; 群体平均 56% &gt; 时序基准 60%——<b>n 还小、不显著</b>,但装置本身可复现地回答了「抹掉答案后还剩多少」。</li>
-    </ul>
+  <section>
+    <h2><span class="n">1</span>方向 · 为什么 · 证据</h2>
+    <div class="row2">
+      <div>
+        <p><span class="lbl">方向:</span>异质多 agent 模拟 → 集合竞价<b>撮合出涌现价</b> → 前向打分。</p>
+        <p><span class="lbl">场景:</span>需要「比裸 LLM / 小样本 / 人工猜更准、且带诚实置信区间」的预测——polymarket、品牌 / 政策调研。</p>
+        <p><span class="lbl">痛点:</span>全领域在 backtest 报「准」,但 LLM 有训练截止 → <b>记得结果</b> → 分不清真 edge 还是背答案。可验证 = 只能前向。</p>
+      </div>
+      <div class="evi"><span class="t">证据 · </span>① LLM 训练数据污染是公认问题;out-of-sample / walk-forward 是金融 ML 标准。② 前向初跑:<b>市场出清 80% &gt; 群体平均 56% &gt; 时序基准 60%</b>(n 小、未显著,但装置产出可复现的诚实数)。</div>
+    </div>
   </section>
 
-  <!-- Q2 -->
-  <section class="q">
-    <div class="qh"><span class="qn">Q2</span><h2>竞品?用什么方法差异化提质?哪些论文证明有效?</h2></div>
-    <div class="grid2">
-      <div class="box"><div class="lbl">竞品 / 现状</div>
-        <ul style="margin:0">
-          <li>裸 LLM「predict this」——无泄露控制、无打分</li>
-          <li>Agent-survey / silicon sampling——模拟 N 个 persona <b>取平均</b>(是投票,不形成价格,且多为回测)</li>
-          <li>TradingAgents / StockAgent——学术多 agent 交易,<b>回测</b>,无前向泄露控制</li>
-          <li>预测市场 / 民调聚合——靠真人,贵、慢、覆盖窄</li>
-        </ul>
+  <section>
+    <h2><span class="n">2</span>竞品 · 差异化 · 有效性</h2>
+    <div class="row2">
+      <div>
+        <table>
+          <thead><tr><th></th><th>裸 LLM</th><th>Agent-survey</th><th class="us">本项目</th></tr></thead>
+          <tbody>
+            <tr><td class="k">前向防泄露</td><td class="o">○</td><td class="o">○</td><td class="us"><span class="y">●</span></td></tr>
+            <tr><td class="k">价格形成(非平均)</td><td class="o">○</td><td class="o">○</td><td class="us"><span class="y">●</span></td></tr>
+            <tr><td class="k">信息异质化</td><td class="o">○</td><td class="part">◐</td><td class="us"><span class="y">●</span></td></tr>
+            <tr><td class="k">多基准诚实打分</td><td class="o">○</td><td class="o">○</td><td class="us"><span class="y">●</span></td></tr>
+          </tbody>
+        </table>
       </div>
-      <div class="box"><div class="lbl">我们的 4 个差异化方法</div>
+      <div>
         <ul style="margin:0">
           <li><b>前向零泄露 harness</b>:预测明天、次日打分 → 灭训练数据污染</li>
-          <li><b>价格从订单流涌现</b>(集合竞价),非观点平均 → 资本加权、非线性、对分布敏感</li>
-          <li><b>信息异质化</b>(info_tier:散户/机构看不同信息)→ 建模真实信息不对称</li>
-          <li><b>诚实打分 + 多基准对照</b>(群体/市场/时序基准)+ 置信区间显著性标注</li>
+          <li><b>价格从订单流涌现</b>(集合竞价):资本加权、对分布敏感,非观点平均</li>
+          <li><b>信息异质化</b>:散户/机构看不同信息,建模真实信息不对称</li>
+          <li><b>多基准对照 + 置信区间</b>:群体 / 市场 / 时序基准各自打分</li>
         </ul>
       </div>
     </div>
-    <p style="margin-top:14px"><b>方法有效性的论文支撑:</b></p>
-    <p class="papers">
-      · <b>多 agent 市场会涌现真实市场特征</b>(肥尾、波动聚集):Lux &amp; Marchesi (1999);Santa Fe Artificial Stock Market;TradingAgents;StockAgent (arXiv:2407.18957);Generative Agents, Park et al. (2023)。<br/>
-      · <b>LLM 能逼近真实人群/调查</b>(支撑向 polymarket/调查迁移):Argyle et al. (2023)「Out of One, Many」(silicon sampling 与真实民调高相关);Aher et al. (2023) LLM 复现经典人类实验效应。<br/>
-      · <b>时序基准</b>:TimesFM, Das et al. (ICML 2024) 作为非 LLM 对照。
-    </p>
-    <p style="margin-top:8px"><span class="caveat">诚实地说:</span>这些论文证明<b>组件</b>成立(ABM 涌现、silicon sampling 与民调相关),但<b>没有一篇</b>证明我们这套组合已经超越真实调查——那正是前向 harness 要持续回答的。</p>
+    <div class="evi" style="margin-top:9px"><span class="t">论文支撑 · </span>多 agent 涌现真实市场特征:Lux &amp; Marchesi (1999)、Generative Agents (Park 2023)、StockAgent (arXiv:2407.18957);LLM 逼近真人群:Argyle (2023)「silicon sampling」与民调高相关;时序基准:TimesFM (Das, ICML 2024)。<span class="caveat">诚实说:</span>这些只证明<b>组件</b>成立,没一篇证明本组合已超真实调查——那正是前向 harness 要持续回答的。</div>
   </section>
 
-  <!-- Q3 -->
-  <section class="q">
-    <div class="qh"><span class="qn">Q3</span><h2>做了什么?什么指标?怎么测?说明了什么?</h2></div>
-    <p><b>做了 (forward_v01,已上线):</b>150 个独一 LLM persona × 5 只股票 / 天,信息分层 + 有符号影响力网络 + 集合竞价价格形成 + 每日 live 打分 + 3 predictor 对照 + 可交互看板(点开看每个 agent 的人设/信息/判断)。全链自动 cron。</p>
-    <p><b>指标(全前向、零泄露):</b>方向命中率(Wilson 置信区间)、95% 区间校准率、平均绝对误差(MAE)。</p>
-    <p><b>怎么跑:</b>walk-forward,本地 launchd 每交易日自动跑、次日评分,目前累积 ~10 个已评分观测(06-02→06-04)。</p>
+  <section class="moat">
+    <h2><span class="n">★</span>核心差异 / 护城河</h2>
+    <p>市面都在比「谁的 agent 模拟更花哨」;我们是<b>唯一把「抹掉训练数据答案后还剩多少」量出来</b>的那个。</p>
+    <ul style="margin-top:6px">
+      <li><b>价格从订单流涌现 ≠ 观点平均</b>:供需曲线非线性交叉、资本加权——早期数据它就<span class="hl">打过了平均(80% vs 56%)</span>。</li>
+      <li><b>难复制点:</b>前向零泄露的诚实纪律 + 信息异质 + 撮合定价 三者合一,且<b>每日自动累积可复现的真实轨迹</b>——不是一次性 demo。</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2><span class="n">3</span>做了什么 · 指标 · 测试</h2>
+    <p><span class="lbl">已上线:</span>150 个独一 LLM persona × 5 股 / 天,分层信息 + 有符号影响力网络 + 集合竞价定价 + 每日 live 打分 + 逐 agent 可交互看板。全链自动 cron。</p>
+    <p><span class="lbl">指标(全前向零泄露):</span>方向命中率(Wilson CI)· 95% 区间校准 · MAE。<span class="lbl">跑法:</span>walk-forward,每交易日自动跑、次日评分,累积 ~10 个观测。</p>
     <div class="metrics">
       <div class="m"><div class="v">56%</div><div class="k">群体共识 命中</div></div>
       <div class="m"><div class="v" style="color:var(--v2)">80%</div><div class="k">市场出清(#3)命中</div></div>
       <div class="m"><div class="v">60%</div><div class="k">时序基准 命中</div></div>
       <div class="m"><div class="v">100%</div><div class="k">落入 95% 区间</div></div>
     </div>
-    <p><b>说明了什么:</b>早期信号——<span class="hl">「价格形成」比「观点平均」更接近真相</span>(市场出清 80% &gt; 群体 56% &gt; 基准 60%),且修了波动率校准后区间 100% 命中。<span class="caveat">但 n=5~10 太小,命中率置信区间仍横跨 50%,统计上还不显著。</span></p>
-    <p><b>诚实结论:</b>现在<b>不能</b>宣称「更准」;但已经有了 ① 一个能<b>诚实、可复现</b>回答这个问题的装置;② 一个值得追的<b>早期方向性信号</b>。这比「回测很赚」的不可验证结论更有价值。</p>
+    <p><span class="lbl">说明:</span>早期信号「<span class="hl">价格形成 &gt; 观点平均</span>」,且修波动率校准后区间 100% 命中。<span class="caveat">但 n 太小、命中 CI 仍横跨 50% → 不显著。</span>诚实结论:还<b>不能</b>说更准,但已有①可复现的诚实装置 ②值得追的早期方向信号——比「回测很赚」的不可验证结论更有价值。</p>
   </section>
 
-  <!-- Q4 -->
-  <section class="q">
-    <div class="qh"><span class="qn">Q4</span><h2>和 ycskill 讨论了吗?她的评价?补充后是否说服?</h2></div>
-    <p style="color:var(--muted);font-size:.92rem">下面是<b>讨论框架草稿</b>——预判她可能的质疑 + 我的补充。真实对话与她的最终评价请你填入。</p>
+  <section>
+    <h2><span class="n">4</span>质疑 · 应对(已自我压测)</h2>
     <ul>
-      <li><b>她可能质疑①「n 太小,80% 是噪声」</b> → 我补充:完全同意,所以重点不是这个数,而是 harness 的<b>可验证性 + 持续累积</b>;我明确标注「尚不显著」,不夸大。</li>
-      <li><b>质疑②「股票近随机游走,信噪比低,选错了标的」</b> → 我补充:同意收益方向难;所以同时报<b>风险/分布校准</b>,且方法<b>可迁移到信噪更高的 polymarket 事件/调查</b>(那才是离 social-survey 误差更近的场景)。</li>
-      <li><b>质疑③「和 silicon sampling / agent survey 的本质区别?」</b> → 我补充:它们<b>平均观点</b>、且回测;我们<b>撮合出价格 + 前向打分 + 信息异质</b>,且能逐 agent 展示。</li>
-      <li><b>质疑④「怎么商业化?」</b> → 我补充:一个<b>可验证的预测/调查引擎</b>——对 polymarket、品牌调研、政策民调,提供「比小样本/裸 LLM 更准、且带诚实置信区间」的低成本前置预测。</li>
+      <li><b>「n 太小,80% 是噪声」</b> → 同意,重点不是这个数,是 harness 的<b>可验证 + 持续累积</b>;我明确标「不显著」、不夸大。</li>
+      <li><b>「股票近随机游走,选错标的」</b> → 同意收益方向难,所以也报<b>风险 / 分布校准</b>,且方法可迁<b>信噪更高的 polymarket / 调查</b>。</li>
+      <li><b>「和 silicon sampling 区别?」</b> → 它们<b>平均观点</b>且回测;我们<b>撮合定价 + 前向打分 + 信息异质 + 逐 agent 可展示</b>。</li>
+      <li><b>「怎么商业化?」</b> → 一个<b>可验证的预测 / 调研引擎</b>:对 polymarket、品牌、政策,给「比小样本更准、带诚实 CI」的低成本前置预测。</li>
     </ul>
-    <div class="fill"><span class="tag">⟵ 待你填</span> 你实际和 ycskill 聊了什么?她的原话评价?你补充哪条信息后她被说服 / 仍存疑哪点?(产品会要能讲清这段)</div>
   </section>
 
-  <p class="foot">
-    研究 / 教育用途的方法论 demo,不构成投资建议。代码 + 实时看板:
-    <a href="https://luanrj-ai.github.io/hivemind-forward/">luanrj-ai.github.io/hivemind-forward</a> ·
-    <a href="https://github.com/luanrj-ai/hivemind-forward">GitHub</a>。数据每交易日自动前向累积。
-  </p>
+  <section>
+    <h2><span class="n">＋</span>踩坑 &amp; 解法(面试加分项)</h2>
+    <div class="probs">
+      <div class="prob"><b>缓存把过期数据 memoize、污染整次运行 →</b> <span class="how">兜底数据不再 memoize、加重试,后续调用重新取最新。</span></div>
+      <div class="prob"><b>95% CI 用「意见分歧度」窄到失真(几乎必出界)→</b> <span class="how">改锚定<b>真实日波动率</b>,区间校准从 ~0 升到 100%。</span></div>
+      <div class="prob"><b>claude 配额装不下 1500 调用 / 天 →</b> <span class="how">信息分层 + 换 haiku + 跨配额窗口限速,稳进单窗口。</span></div>
+      <div class="prob"><b>价格只会「平均观点」、不像市场 →</b> <span class="how">加集合竞价撮合(#3),让价格从订单流涌现,资本加权。</span></div>
+    </div>
+  </section>
+
+  <footer>研究 / 教育用途,不构成投资建议 · 数据每交易日前向累积 · <a href="https://luanrj-ai.github.io/hivemind-forward/">luanrj-ai.github.io/hivemind-forward</a></footer>
 </div>
 </body>
 </html>
