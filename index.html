@@ -37,7 +37,9 @@
   .navlinks{display:flex;gap:24px;font-size:.85rem;color:var(--muted)}
   .navlinks a{text-decoration:none;transition:color .2s}
   .navlinks a:hover{color:var(--ink)}
-  @media(max-width:640px){.navlinks{display:none}}
+  .navlinks a.navcta{color:var(--v2);border:1px solid var(--border);border-radius:999px;padding:6px 14px;background:rgba(245,158,11,.08)}
+  .navlinks a.navcta:hover{background:rgba(245,158,11,.16);color:var(--ink)}
+  @media(max-width:640px){.navlinks a:not(.navcta){display:none}}
 
   .hero{min-height:82vh;display:flex;flex-direction:column;justify-content:center;padding:56px 0 64px}
   .eyebrow{display:inline-flex;align-items:center;gap:9px;font-family:"JetBrains Mono",monospace;
@@ -138,12 +140,11 @@
   <div class="navinner">
     <div class="brand"><span class="hex">⬡</span> Hivemind <span style="color:var(--v2)">Forward</span></div>
     <div class="navlinks">
-      <a href="#how">如何运作</a>
+      <a href="#why">为什么</a>
+      <a href="#how">怎么做</a>
       <a href="#market">价格形成</a>
-      <a href="#about">关于</a>
       <a href="#track">战绩</a>
-      <a href="explore.html">探索蜂巢</a>
-      <a href="https://github.com/luanrj-ai/hivemind-forward/tree/forward-predict" target="_blank" rel="noopener">GitHub ↗</a>
+      <a class="navcta" href="explore.html">探索蜂巢 →</a>
     </div>
   </div>
 </nav>
@@ -154,8 +155,7 @@
   <p class="sub">每个交易日，<b>150 个独一无二的 LLM agent × 5 只股票</b>读当天真实行情与新闻，各自推理出对次日的判断，汇成一个带波动率校准区间的预测。<b>第二天，用真实收盘评分。</b>预测的目标在做出时根本不存在——所以没有 lookahead，也没有训练数据污染。这是检验「AI 群体到底有没有真实 edge」唯一诚实的方法。</p>
   <div class="cta">
     <a class="btn btn-primary" href="explore.html">探索蜂巢 · 看每个 agent →</a>
-    <a class="btn btn-ghost" href="#about">为什么这么做</a>
-    <a class="btn btn-ghost" href="#track">实时战绩</a>
+    <a class="btn btn-ghost" href="#why">为什么这么做</a>
   </div>
   <div class="stats">
     <div class="stat"><div class="v">750<span class="u">/天</span></div><div class="k">LLM agent 推理</div></div>
@@ -164,6 +164,33 @@
     <div class="stat"><div class="v">T+1</div><div class="k">次日真实数据评分</div></div>
   </div>
 </header>
+
+<!-- WHY -->
+<section class="block" id="why">
+  <div class="wrap">
+    <div class="kicker">为什么 · Why</div>
+    <h2>世界不需要又一个「回测很赚」的 AI 交易模型</h2>
+    <p class="lead">因为几乎所有 AI 交易研究都犯同一个错——而这个项目存在,就是为了不犯它。</p>
+    <div class="cards">
+      <div class="card">
+        <div class="tag"><span class="ic">?</span> 问题</div>
+        <h3>回测在骗你</h3>
+        <p>LLM 有<b>训练截止日</b>。让它「预测」2024 年的 AAPL,它很可能<b>记得</b>当时真实发生了什么——这不是预测,是<span class="hl">泄题</span>。</p>
+        <p>于是几乎所有「AI 选股回测很赚」的结论都被训练数据污染,<b>分不清是真 edge 还是在背答案</b>。</p>
+      </div>
+      <div class="card">
+        <div class="tag"><span class="ic">✓</span> 我们的回答</div>
+        <h3>只测未来,不测过去</h3>
+        <p>唯一诚实的检验:预测一个<b>做出时还根本不存在</b>的未来交易日,第二天再用真实收盘对账。</p>
+        <p>目标价格在预测时不存在 → <span class="hl">没有 lookahead、没有训练数据污染</span>。剩下的命中率,才是可信的。</p>
+      </div>
+    </div>
+    <div class="quote">
+      <p>"别问『回测能赚多少』。问『把训练数据里的答案抹掉之后,它还剩多少』。"</p>
+      <div class="who">— 这个项目的全部立场</div>
+    </div>
+  </div>
+</section>
 
 <!-- HOW -->
 <section class="block" id="how">
@@ -210,61 +237,23 @@
   </div>
 </section>
 
-<!-- ABOUT -->
-<section class="block" id="about">
-  <div class="wrap">
-    <div class="kicker">关于 · Why / How / Expected Outcome</div>
-    <h2>为什么世界不需要又一个「回测很赚」的 AI 交易模型</h2>
-    <p class="lead">因为几乎所有 AI 交易研究都犯同一个错——而这个项目存在，就是为了不犯它。</p>
-
-    <div class="cards">
-      <div class="card">
-        <div class="tag"><span class="ic">?</span> Why · 为什么</div>
-        <h3>回测在骗你</h3>
-        <p>LLM 有<b>训练截止日</b>。让它「预测」2024 年的 AAPL，它很可能<b>记得</b>当时实际发生了什么——这不是预测，是<span class="hl">泄题</span>。</p>
-        <p>于是几乎所有「AI 选股回测很赚」的结论都被这种训练数据污染所影响，<b>无法分辨是真有 edge，还是模型在背答案</b>。</p>
-        <p>唯一诚实的检验:预测一个<b>做出时还不存在</b>的未来交易日,第二天再看。</p>
-      </div>
-      <div class="card">
-        <div class="tag"><span class="ic">⚙</span> How · 怎么做</div>
-        <h3>前向、群体、自动</h3>
-        <p>每个交易日,<b>150 个独一无二的 LLM agent × 5 只股票</b>读当天真实行情与新闻,用语言各自推理。</p>
-        <p>它们沿<b>带符号的影响力网络</b>相互影响——羊群与逆向<span class="hl">涌现</span>而非写死;再按资本与影响力加权聚合成一个带<b>波动率校准区间</b>的次日预测。</p>
-        <p>第二天用 <b>live 真实收盘</b>评分:方向命中率(带置信区间)、区间校准度、平均误差。整条链自动跑、零泄露、可复现。</p>
-      </div>
-      <div class="card">
-        <div class="tag"><span class="ic">◎</span> Expected · 预期结果</div>
-        <h3>一份诚实的成绩单</h3>
-        <p>原假设是真的:我们<b>预期群体接近抛硬币</b>(方向 ~50%)。战绩面板会明确标注:命中率的置信区间<b>还横跨 50%</b>时,就是「尚不显著」。</p>
-        <p>价值不在「跑赢市场」,而在<span class="hl">这套诚实的检验装置本身</span>——以及它能量出 AI 群体有没有未被污染的真实 edge、它有什么「性格」(比如超买就看空的均值回归倾向)。</p>
-        <p>若几十个交易日后真出现了把区间推离 50% 的 edge,那才是<b>可信的、非回测幻觉的</b>信号。</p>
-      </div>
-    </div>
-
-    <div class="quote">
-      <p>“别问『回测能赚多少』。问『把训练数据里的答案抹掉之后,它还剩多少』。”</p>
-      <div class="who">— 这个项目的全部立场</div>
-    </div>
-  </div>
-</section>
-
 <!-- TRACK RECORD -->
 <section class="block" id="track">
   <div class="wrap">
-    <div class="kicker">实时战绩 · Leakage-free track record</div>
-    <h2>每一条都是前向、零泄露的预测</h2>
-    <p class="lead">下面是当前累积的真实成绩。<b>样本还极小</b>——前向测试的代价就是慢,要几十个交易日才有统计意义。这份诚实,正是重点。</p>
+    <div class="kicker">战绩 · 三个预测器同台</div>
+    <h2>群体共识 vs 市场出清 vs 时序基准,谁更准?</h2>
+    <p class="lead">同一个零泄露前向测试里,三种方法各自打分。<b>我们预期接近抛硬币</b>——价值在这套<b>诚实的检验装置本身</b>,以及它能量出 AI 群体有没有未被污染的真实 edge。样本还极小,要几十个交易日才有统计意义。</p>
 
     <div class="sb">
       <div class="sbhead">
         <span class="t">overall · walk-forward</span>
-        <span class="badge">⚠ 仅 5 个观测 · 统计上仍 = 抛硬币</span>
+        <span class="badge">⚠ 仅 ~10 个观测 · 命中率 CI 仍横跨 50% = 抛硬币</span>
       </div>
       <div class="sbgrid">
-        <div class="sbcell"><div class="v">60%</div><div class="k">方向命中率 (3/5)</div></div>
-        <div class="sbcell"><div class="v">100%</div><div class="k">落入 95% 区间 (5/5)</div></div>
-        <div class="sbcell"><div class="v">2.20%</div><div class="k">平均绝对误差</div></div>
-        <div class="sbcell"><div class="v">[23,88]</div><div class="k">命中率 95% CI ·横跨50%</div></div>
+        <div class="sbcell"><div class="v">56%</div><div class="k">群体共识 命中</div></div>
+        <div class="sbcell"><div class="v" style="color:var(--v2)">80%</div><div class="k">市场出清 #3 命中</div></div>
+        <div class="sbcell"><div class="v">60%</div><div class="k">时序基准 命中</div></div>
+        <div class="sbcell"><div class="v">100%</div><div class="k">落入 95% 区间</div></div>
       </div>
       <div class="rows">
         <div class="row h"><span>股票</span><span>预测 (06-02→06-03)</span><span>实际</span><span>方向</span></div>
@@ -275,7 +264,7 @@
         <div class="row"><span class="tk">NVDA</span><span class="pill">+0.12% 多</span><span class="pill no">−3.62%</span><span class="no">✗</span></div>
       </div>
     </div>
-    <p class="disc">06-03 是全市场普跌日(5 只全红)。模型整体偏空的「性格」撞上跌日,猜对了 3 个看空的、错了 2 个看多的。前一天它看空 AAPL、AAPL 却涨 +2.9%(错)。一对一错——这正是 n 太小时该有的样子。数字随每日自动跑实时更新。</p>
+    <p class="disc">上表是 06-02→06-03 那一天的明细(全市场普跌,模型整体偏空、猜对 3 个看空的)。早期信号有意思:<b>「市场出清」方向命中 80%,压过「群体共识」56% 和基准 60%</b>——价格形成可能比观点平均更接近真相。但 n 太小、命中率 CI 仍横跨 50%,统计上还不显著。数字每个交易日自动更新——<a href="explore.html" style="color:var(--v2)">进探索蜂巢看实时的</a>。</p>
   </div>
 </section>
 
@@ -285,7 +274,7 @@
       <div class="brand"><span class="hex">⬡</span> Hivemind Forward</div>
       <div style="display:flex;gap:22px">
         <a href="https://github.com/luanrj-ai/hivemind-forward/tree/forward-predict" target="_blank" rel="noopener">GitHub</a>
-        <a href="#about">关于</a>
+        <a href="#why">为什么</a>
         <a href="#track">战绩</a>
       </div>
     </div>
@@ -300,23 +289,24 @@
   let w,h,P=[],raf,t=0;
   const N=window.innerWidth<640?42:78;
   function size(){w=c.width=innerWidth*devicePixelRatio;h=c.height=innerHeight*devicePixelRatio;c.style.width=innerWidth+'px';c.style.height=innerHeight+'px';}
-  function init(){P=[];for(let i=0;i<N;i++){P.push({x:Math.random()*w,y:Math.random()*h,vx:(Math.random()-.5)*.25*devicePixelRatio,vy:(Math.random()-.5)*.25*devicePixelRatio,r:(Math.random()*1.6+.8)*devicePixelRatio,bull:Math.random()>.5});}}
+  function init(){P=[];for(let i=0;i<N;i++){P.push({x:Math.random()*w,y:Math.random()*h,vx:(Math.random()-.5)*.10*devicePixelRatio,vy:(Math.random()-.5)*.10*devicePixelRatio,r:(Math.random()*1.5+1.0)*devicePixelRatio,bull:Math.random()>.5,ph:Math.random()*6.283,sp:0.5+Math.random()*1.0});}}
   function step(){
-    t+=0.004;
-    const ax=w*(.5+.28*Math.cos(t)),ay=h*(.42+.22*Math.sin(t*1.3)); // slow attractor = "the news"
+    t+=0.016;
     x.clearRect(0,0,w,h);
-    // faint links (herding)
+    // faint links between nearby dots — gently shimmer, no collapse
     for(let i=0;i<P.length;i++){for(let j=i+1;j<P.length;j++){
       const a=P[i],b=P[j],dx=a.x-b.x,dy=a.y-b.y,d=dx*dx+dy*dy,R=(120*devicePixelRatio)**2;
-      if(d<R){const o=(1-d/R)*.16;x.strokeStyle='rgba(245,158,11,'+o+')';x.lineWidth=devicePixelRatio*.5;x.beginPath();x.moveTo(a.x,a.y);x.lineTo(b.x,b.y);x.stroke();}
+      if(d<R){const o=(1-d/R)*.10;x.strokeStyle='rgba(245,158,11,'+o+')';x.lineWidth=devicePixelRatio*.5;x.beginPath();x.moveTo(a.x,a.y);x.lineTo(b.x,b.y);x.stroke();}
     }}
     for(const p of P){
-      p.vx+=(ax-p.x)*0.00018; p.vy+=(ay-p.y)*0.00018;
-      p.vx*=0.985; p.vy*=0.985; p.x+=p.vx; p.y+=p.vy;
-      if(p.x<0||p.x>w)p.vx*=-1; if(p.y<0||p.y>h)p.vy*=-1;
+      // gentle constant drift + edge bounce — stays spread out, never collapses
+      p.x+=p.vx; p.y+=p.vy;
+      if(p.x<p.r||p.x>w-p.r)p.vx*=-1; if(p.y<p.r||p.y>h-p.r)p.vy*=-1;
+      // breathing twinkle: opacity pulses in place
+      const tw=(0.5+0.45*Math.sin(p.ph+t*p.sp)).toFixed(3);
       x.beginPath();x.arc(p.x,p.y,p.r,0,7);
-      x.fillStyle=p.bull?'rgba(252,211,77,.9)':'rgba(245,158,11,.55)';
-      x.shadowBlur=8*devicePixelRatio;x.shadowColor='rgba(245,158,11,.5)';x.fill();x.shadowBlur=0;
+      x.fillStyle=(p.bull?'rgba(252,211,77,':'rgba(245,158,11,')+tw+')';
+      x.shadowBlur=7*devicePixelRatio;x.shadowColor='rgba(245,158,11,'+(tw*0.45).toFixed(3)+')';x.fill();x.shadowBlur=0;
     }
     raf=requestAnimationFrame(step);
   }

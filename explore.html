@@ -183,12 +183,12 @@ function chips(elId, items, cur, on){
 function setDate(d){state.date=d; const ts=Object.keys(D.cells[d]).sort(); if(!ts.includes(state.ticker))state.ticker=ts[0]; render();}
 function setTicker(t){state.ticker=t; render();}
 document.querySelectorAll('#colorChips .chip').forEach(c=>c.onclick=()=>{
-  state.colorBy=c.dataset.c; document.querySelectorAll('#colorChips .chip').forEach(x=>x.classList.toggle('on',x===c)); paintNodes();});
+  state.colorBy=c.dataset.c; document.querySelectorAll('#colorChips .chip').forEach(x=>x.classList.toggle('on',x===c)); paintNodes(); draw();});
 
 // ---- network force sim ----
 const cv=document.getElementById('net'), cx=cv.getContext('2d');
 const tip=document.getElementById('tip');
-let nodes=[], edges=[], raf=null, DPR=Math.min(2,window.devicePixelRatio||1);
+let nodes=[], edges=[], raf=null, alpha=1, DPR=Math.min(2,window.devicePixelRatio||1);
 function sizeCanvas(){cv.width=cv.clientWidth*DPR;cv.height=cv.clientHeight*DPR;}
 function radius(cap){const r=cap>0?Math.log10(cap+10):3; return (3+ (r-3)*1.7)*DPR;}
 
@@ -220,9 +220,11 @@ function simStep(){
   const L=70*DPR;
   edges.forEach(([a,b,w])=>{let dx=b.x-a.x,dy=b.y-a.y,d=Math.sqrt(dx*dx+dy*dy)||1;const f=(d-L)*0.012;
     const fx=f*dx/d,fy=f*dy/d;a.vx+=fx;a.vy+=fy;b.vx-=fx;b.vy-=fy;});
-  // gravity + integrate
+  // gravity + integrate, scaled by a cooling temperature `alpha` so the layout
+  // SETTLES (and then freezes) instead of jittering forever — needed for hover.
   nodes.forEach(n=>{n.vx+=(cxC-n.x)*0.004;n.vy+=(cyC-n.y)*0.004;n.vx*=0.86;n.vy*=0.86;
-    n.x+=n.vx;n.y+=n.vy; n.x=Math.max(n.r,Math.min(W-n.r,n.x));n.y=Math.max(n.r,Math.min(H-n.r,n.y));});
+    n.x+=n.vx*alpha;n.y+=n.vy*alpha; n.x=Math.max(n.r,Math.min(W-n.r,n.x));n.y=Math.max(n.r,Math.min(H-n.r,n.y));});
+  alpha*=0.96;
 }
 function draw(){
   cx.clearRect(0,0,cv.width,cv.height);
@@ -235,7 +237,10 @@ function paintNodes(){
   nodes.forEach(n=>{ if(state.colorBy==='arch'){n._col=ARCH_COLOR[n.p.archetype]||'#999';}
     else{n._col= n.lean?LEAN_COLOR[n.lean]:'#5b5446';}});
 }
-function loop(){simStep();paintNodes();draw();raf=requestAnimationFrame(loop);}
+function loop(){
+  if(alpha>0.02){ simStep(); paintNodes(); draw(); raf=requestAnimationFrame(loop); }
+  else { paintNodes(); draw(); raf=null; }   // settled → freeze (static, hoverable)
+}
 
 // hover
 cv.onmousemove=e=>{const rect=cv.getBoundingClientRect();const mx=(e.clientX-rect.left)*DPR,my=(e.clientY-rect.top)*DPR;
@@ -289,6 +294,7 @@ function render(){
     v.innerHTML=`<span>实际 ${sc.actual_return_pct>=0?'+':''}${sc.actual_return_pct}% (${sc.target_date})</span><b>共识 ${ok?'✓':'✗'}${mkv}</b>`;
   }else{v.className='verdict v-pend';v.innerHTML='<span>等次日收盘评分…</span><b>pending</b>';}
   archBars(cell); drawSpark(cell); drawBook(cell); buildGraph(cell); paintNodes();
+  alpha=1; if(!raf) loop();   // re-heat layout for the new graph, then it settles & freezes
   drawTimeline(); sbNums();
 }
 function nodesLabel(cell){const n=cell.views?cell.views.length:(cell.forecast.n_votes||0);return `${n} agents · ${edges.length||''} ties`;}
