@@ -45,7 +45,7 @@
   .leg{position:absolute;left:16px;bottom:14px;display:flex;gap:16px;flex-wrap:wrap;font-size:.74rem;color:var(--muted);z-index:2;pointer-events:none}
   .leg i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:middle}
   .leg .ln{width:16px;height:0;border-top:2px solid;display:inline-block;margin-right:5px;vertical-align:middle}
-  .tip{position:absolute;z-index:5;pointer-events:none;transform:translate(-50%,-112%);min-width:190px;max-width:280px;
+  .tip{position:fixed;z-index:80;pointer-events:none;min-width:190px;max-width:280px;
     background:rgba(12,9,6,.97);border:1px solid var(--border);border-radius:11px;padding:11px 13px;font-size:.78rem;line-height:1.5;
     box-shadow:0 10px 34px rgba(0,0,0,.6);backdrop-filter:blur(6px);display:none}
   .tip .nm{font-weight:700;font-family:"Space Grotesk",sans-serif}
@@ -254,7 +254,12 @@ cv.onmousemove=e=>{const rect=cv.getBoundingClientRect();const mx=(e.clientX-rec
     if(best.lean) h+=`<div class="kv"><span>判断</span><b class="lean-${best.lean}">${best.lean} ${(best.conv*100|0)}%</b></div>`;
     if(best.nar) h+=`<div class="nar">“${best.nar}”</div>`;
     tip.innerHTML=h; tip.style.display='block';
-    tip.style.left=(best.x/DPR)+'px'; tip.style.top=(best.y/DPR)+'px';
+    // viewport-anchored + clamped so the card never gets clipped by the panel
+    // border or run off-screen (position:fixed escapes the overflow:hidden).
+    const tw=tip.offsetWidth, th=tip.offsetHeight;
+    let lx=e.clientX - tw/2; lx=Math.max(8, Math.min(innerWidth - tw - 8, lx));
+    let ty=e.clientY - th - 14; if(ty < 8) ty=e.clientY + 18;   // flip below if near top
+    tip.style.left=lx+'px'; tip.style.top=ty+'px';
   } else tip.style.display='none';
 };
 cv.onmouseleave=()=>tip.style.display='none';

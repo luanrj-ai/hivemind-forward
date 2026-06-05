@@ -21,6 +21,7 @@ mkdir -p results
 cp "$SRC/landing.html" index.html      # Pages root = landing
 cp "$SRC/landing.html" landing.html    # explore's "← 首页" target
 cp "$SRC/explore.html" explore.html
+cp "$SRC/onepager.html" onepager.html
 cp "$SRC/results/viz_data.js" results/viz_data.js
 cp "$SRC/results/viz_data.json" results/viz_data.json
 touch .nojekyll
