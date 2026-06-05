@@ -88,6 +88,26 @@
   @media(max-width:860px){.loop{grid-template-columns:repeat(2,1fr)}}
   @media(max-width:520px){.loop{grid-template-columns:1fr}}
 
+  .diagram{margin:34px 0 6px;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:22px 20px;overflow-x:auto}
+  .diagram svg{width:100%;min-width:680px;height:auto;display:block}
+  .layers{display:flex;flex-direction:column;gap:10px;margin-top:34px}
+  .layer{display:grid;grid-template-columns:150px 1fr;gap:18px;align-items:center;
+    background:var(--card);border:1px solid var(--border);border-radius:13px;padding:16px 20px}
+  .layer .ln{display:flex;align-items:center;gap:11px}
+  .layer .num{font-family:"JetBrains Mono",monospace;font-size:.74rem;color:var(--v2);border:1px solid var(--border);border-radius:7px;padding:3px 8px}
+  .layer .nm{font-weight:700;font-family:"Space Grotesk","Noto Sans SC",sans-serif;font-size:1rem}
+  .layer .ds{color:var(--muted);font-size:.9rem;line-height:1.6}
+  .layer .ds b{color:var(--ink)} .layer .ds .k{color:var(--v2)}
+  @media(max-width:640px){.layer{grid-template-columns:1fr;gap:7px}}
+  .principle{margin-top:30px;display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:760px){.principle{grid-template-columns:1fr}}
+  .principle .p{background:var(--card);border:1px solid var(--border);border-radius:13px;padding:18px 20px}
+  .principle .p h4{font-size:.98rem;font-weight:700;margin-bottom:8px;font-family:"Space Grotesk","Noto Sans SC",sans-serif}
+  .principle .p p{color:var(--muted);font-size:.9rem;line-height:1.65}
+  .principle .p b{color:var(--ink)} .principle .p .k{color:var(--v2);font-weight:600}
+  .eq{font-family:"JetBrains Mono",monospace;font-size:.82rem;color:var(--v2);background:rgba(245,158,11,.07);
+    border:1px solid var(--border);border-radius:8px;padding:9px 12px;margin-top:9px;overflow-x:auto;white-space:nowrap}
+
   /* about cards */
   .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:42px}
   .card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:30px 26px;backdrop-filter:blur(8px)}
@@ -142,7 +162,7 @@
     <div class="navlinks">
       <a href="#why">为什么</a>
       <a href="#how">怎么做</a>
-      <a href="#market">价格形成</a>
+      <a href="#arch">架构</a>
       <a href="#track">战绩</a>
       <a class="navcta" href="explore.html">探索蜂巢 →</a>
     </div>
@@ -198,6 +218,30 @@
     <div class="kicker">如何运作 · The Daily Loop</div>
     <h2>一条命令，每个交易日自动跑一次</h2>
     <p class="lead">先给到期的旧预测拉真实收盘评分，再做今天的新预测。两步之间隔着一整夜——目标价格在预测时还不存在，泄露从结构上被堵死。</p>
+    <div class="diagram">
+      <svg viewBox="0 0 920 156" role="img" aria-label="每日流水线">
+        <defs>
+          <marker id="arH" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#f59e0b"/></marker>
+          <style>.bx{fill:rgba(12,9,6,.9);stroke:rgba(255,238,210,.18)}.tt{fill:#f7f4ec;font:600 12px 'Space Grotesk',sans-serif}.st{fill:#a39c8e;font:10px 'JetBrains Mono',monospace}.am{fill:#fcd34d;font:600 11px 'JetBrains Mono',monospace}</style>
+        </defs>
+        <g>
+          <rect class="bx" x="6" y="44" width="120" height="56" rx="9"/><text class="tt" x="66" y="68" text-anchor="middle">真实数据</text><text class="st" x="66" y="84" text-anchor="middle">价格·指标·新闻 ≤今日</text>
+          <rect class="bx" x="160" y="44" width="130" height="56" rx="9"/><text class="tt" x="225" y="68" text-anchor="middle">150 异质 agent</text><text class="st" x="225" y="84" text-anchor="middle">分层信息·各自推理</text>
+          <rect class="bx" x="324" y="44" width="130" height="56" rx="9"/><text class="tt" x="389" y="68" text-anchor="middle">影响力网络</text><text class="st" x="389" y="84" text-anchor="middle">羊群/逆向 涌现</text>
+          <rect class="bx" x="488" y="44" width="130" height="56" rx="9"/><text class="tt" x="553" y="68" text-anchor="middle">集合竞价撮合</text><text class="st" x="553" y="84" text-anchor="middle">供需交叉=出清</text>
+          <rect class="bx" x="652" y="44" width="120" height="56" rx="9"/><text class="tt" x="712" y="68" text-anchor="middle">涌现价格 T+1</text><text class="st" x="712" y="84" text-anchor="middle">分布+95%CI</text>
+          <rect class="bx" x="806" y="44" width="108" height="56" rx="9" stroke="#22c55e"/><text class="tt" x="860" y="68" text-anchor="middle">次日打分</text><text class="st" x="860" y="84" text-anchor="middle">vs真实·vs基准</text>
+        </g>
+        <g stroke="#f59e0b" stroke-width="1.5" marker-end="url(#arH)">
+          <line x1="126" y1="72" x2="158" y2="72"/><line x1="290" y1="72" x2="322" y2="72"/>
+          <line x1="454" y1="72" x2="486" y2="72"/><line x1="618" y1="72" x2="650" y2="72"/>
+          <line x1="772" y1="72" x2="804" y2="72"/>
+        </g>
+        <text class="am" x="789" y="28" text-anchor="middle">⟂ 隔夜 · 目标此刻不存在</text>
+        <line x1="789" y1="34" x2="789" y2="44" stroke="#fcd34d" stroke-dasharray="3,2"/>
+        <text class="st" x="460" y="136" text-anchor="middle">全链自动跑 · 零 lookahead · 零训练数据污染 · 可复现</text>
+      </svg>
+    </div>
     <div class="loop">
       <div class="step"><div class="n">01</div><h3>读真实世界</h3><p>每只股票拉当天的 live 行情、技术指标、GDELT 新闻头条——全部 ≤ 今天。</p></div>
       <div class="step"><div class="n">02</div><h3>150 个大脑各自想</h3><p>每个 agent 是独一无二的 persona（资本、时间尺度、风险、逆向性各异），用语言独立推出自己的多空判断。</p></div>
@@ -233,6 +277,40 @@
     </div>
     <div class="cta" style="margin-top:36px">
       <a class="btn btn-primary" href="explore.html#market">看订单簿撮合 →</a>
+    </div>
+  </div>
+</section>
+
+<!-- ARCHITECTURE / PRINCIPLE -->
+<section class="block" id="arch">
+  <div class="wrap">
+    <div class="kicker">架构 / 原理 · How it actually works</div>
+    <h2>少数语言推理,海量数学动力学,撮合出一个涌现的价格</h2>
+    <p class="lead">不是"一个聪明模型猜数字",而是一个分层的<b>市场世界模型</b>:语言模型负责"想",社会动力学和撮合负责"形成价格",前向打分负责"验证"。</p>
+
+    <div class="layers">
+      <div class="layer"><div class="ln"><span class="num">L1</span><span class="nm">数据层</span></div>
+        <div class="ds">point-in-time 的 live 行情 / 技术指标 / GDELT 新闻,<b>严格 ≤ 当日</b>。所有信息带时间戳,杜绝未来泄露。</div></div>
+      <div class="layer"><div class="ln"><span class="num">L2</span><span class="nm">认知层</span></div>
+        <div class="ds">150 个<b>异质 LLM agent</b>,<span class="k">分层信息</span>:散户只看价格+新闻,机构再加基本面+量化先验。每个用语言独立推出多空判断——没有两个一样。</div></div>
+      <div class="layer"><div class="ln"><span class="num">L3</span><span class="nm">社会层</span></div>
+        <div class="ds"><b>有符号影响力网络</b>:agent 沿"谁带动谁"相互影响,<span class="k">羊群与逆向涌现</span>(意见动力学),而非脚本写死。</div></div>
+      <div class="layer"><div class="ln"><span class="num">L4</span><span class="nm">定价层</span></div>
+        <div class="ds">把判断变成<b>限价单</b>,一轮<b>集合竞价撮合</b>,价格从供需交叉<span class="k">涌现</span>(资本加权、对分布敏感)——不是观点平均。</div></div>
+      <div class="layer"><div class="ln"><span class="num">L5</span><span class="nm">评估层</span></div>
+        <div class="ds">次日 live 打分:<b>群体共识 vs 市场出清 vs 时序基准</b>三者对照,方向命中率带 <span class="k">Wilson 置信区间</span>与显著性标注。</div></div>
+    </div>
+
+    <div class="principle">
+      <div class="p">
+        <h4>少数大脑 + 群体数学</h4>
+        <p>语言模型负责<b>语言、因果、异质判断</b>(贵,所以只用 150 个真推理);<b>撮合与意见动力学</b>负责定价(便宜,纯数学、可扩展)。<span class="k">既真又可扩</span>——少数心智用语言思考,价格用数学形成。</p>
+      </div>
+      <div class="p">
+        <h4>前向 = 诚实</h4>
+        <p>目标价格在预测时<b>根本不存在</b> → 没有 lookahead、没有训练数据污染。每个 agent 的信念按意见动力学更新:</p>
+        <div class="eq">belief_i(t+1) = clip[ α·belief_i + β·Σ w_ij·belief_j + γ·price + δ·news ]</div>
+      </div>
     </div>
   </div>
 </section>
@@ -274,8 +352,9 @@
       <div class="brand"><span class="hex">⬡</span> Hivemind Forward</div>
       <div style="display:flex;gap:22px">
         <a href="https://github.com/luanrj-ai/hivemind-forward/tree/forward-predict" target="_blank" rel="noopener">GitHub</a>
-        <a href="#why">为什么</a>
-        <a href="#track">战绩</a>
+        <a href="onepager.html">方法论 / 一页纸</a>
+        <a href="explore.html">探索蜂巢</a>
+        <a href="#arch">架构</a>
       </div>
     </div>
     <p class="disc">研究 / 教育用途的方法论 demo,<b>不构成投资建议</b>。前向测试的目的是诚实地度量,而非承诺收益。预测由 LLM 集成生成,可能(并且大概率)接近随机。</p>
