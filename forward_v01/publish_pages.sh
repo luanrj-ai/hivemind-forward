@@ -31,6 +31,6 @@ if git diff --cached --quiet; then
 else
   git -c user.name="Julie Luan" -c user.email="chenxia2@uoem.edu.gr" \
     commit -q -m "pages: refresh $(date +%F)"
-  git push -q origin gh-pages && echo "✓ live site refreshed: https://julieluan.github.io/ai-trading-sim/" \
+  git push -q origin gh-pages && echo "✓ live site refreshed: https://luanrj-ai.github.io/hivemind-forward/" \
     || echo "WARN: pages push failed (committed locally)"
 fi
