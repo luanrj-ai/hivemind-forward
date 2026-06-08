@@ -19,6 +19,7 @@ import argparse
 import json
 import os
 import sys
+from collections import defaultdict
 from pathlib import Path
 
 from forward_v01 import aggregate, baseline, data_live, market, population
@@ -63,7 +64,7 @@ def score_pending() -> tuple[int, int]:
     if not pending:
         print("  (no pending predictions to score)")
         return 0, 0
-    still_pending, scored_now = [], 0
+    still_pending, matured = [], []
     for rec in pending:
         tkr, as_of, h = rec["ticker"], rec["as_of_date"], rec["horizon_days"]
         target_date, actual_close = data_live.nth_trading_close(tkr, as_of, h)
@@ -92,13 +93,33 @@ def score_pending() -> tuple[int, int]:
         if mk:
             rec["market_dir_correct"] = _dir(mk["return_pct"]) == _dir(actual_pct)
             rec["market_abs_error_pct"] = round(abs(actual_pct - mk["return_pct"]), 3)
-        _append(SCORED, rec)
-        scored_now += 1
+        matured.append(rec)
         print(f"  scored {tkr} {as_of}→{target_date}: pred {exp:+.2f}% "
               f"act {actual_pct:+.2f}%  {'✓' if rec['direction_correct'] else '✗'}"
               f"  {'in-CI' if rec['in_ci'] else 'out-CI'}")
+
+    # A-ii cross-sectional (market-neutral) scoring: within each target day, did
+    # the ticker out/under-perform the basket as predicted? Subtracting the basket
+    # mean removes the market-beta component (which dominates absolute direction).
+    by_td = defaultdict(list)
+    for r in matured:
+        by_td[r["target_date"]].append(r)
+    for td, grp in by_td.items():
+        if len(grp) < 2:
+            continue
+        mean_act = sum(r["actual_return_pct"] for r in grp) / len(grp)
+        for r in grp:
+            rel = r["actual_return_pct"] - mean_act
+            r["xs_actual_rel_pct"] = round(rel, 3)
+            if r.get("xs_crowd") is not None:
+                r["xs_crowd_dir_correct"] = _dir(r["xs_crowd"]) == _dir(rel)
+            if r.get("xs_market") is not None:
+                r["xs_market_dir_correct"] = _dir(r["xs_market"]) == _dir(rel)
+
+    for r in matured:
+        _append(SCORED, r)
     _write(PENDING, still_pending)
-    return scored_now, len(still_pending)
+    return len(matured), len(still_pending)
 
 
 # ── Phase 2: predict today ────────────────────────────────────────────────────
@@ -167,6 +188,19 @@ def predict_today(date: str | None, tickers: list[str], agents: int,
               f"| market(clear) {mk_store['return_pct']:+.2f}% "
               f"({mk_store['n_buyers']}b/{mk_store['n_sellers']}s)  "
               f"L/S/N={fc['n_long']}/{fc['n_short']}/{fc['n_neutral']} abstain={fc['n_abstain']}")
+
+    # A-ii cross-sectional (market-neutral): each ticker's predicted move minus
+    # the basket mean → "will it OUTPERFORM the group?". This removes market beta
+    # (the dominant driver of absolute daily direction).
+    if len(out) >= 2:
+        mc = sum(r["forecast"]["expected_return_pct"] for r in out) / len(out)
+        mm = sum((r.get("market") or {}).get("return_pct", 0) for r in out) / len(out)
+        for r in out:
+            r["xs_crowd"] = round(r["forecast"]["expected_return_pct"] - mc, 3)
+            r["xs_market"] = round((r.get("market") or {}).get("return_pct", 0) - mm, 3)
+        print("\n  cross-sectional (相对强弱, market-neutral):")
+        for r in sorted(out, key=lambda x: -x["xs_crowd"]):
+            print(f"    {r['ticker']:6} crowd-rel {r['xs_crowd']:+.2f}%  market-rel {r['xs_market']:+.2f}%")
     _write(PENDING, pending)
     return out
 

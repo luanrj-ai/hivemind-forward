@@ -105,7 +105,13 @@ def aggregate(views: list[dict], personas: list[dict], edges: dict,
     var = sum((w / total_w) * (s - signal) ** 2 for _, w, s in rows)
     dispersion = math.sqrt(var)
 
-    exp_pct = signal * RETURN_PER_SIGNAL_PER_DAY * target_horizon * 100
+    # Expected move anchored to the stock's daily vol (a full-conviction consensus
+    # ≈ one daily sigma), so the crowd magnitude is realistic instead of always
+    # ~±0.1%. Falls back to the old fixed calibration if vol is unknown.
+    if daily_vol_pct and daily_vol_pct > 0:
+        exp_pct = signal * daily_vol_pct * math.sqrt(target_horizon)
+    else:
+        exp_pct = signal * RETURN_PER_SIGNAL_PER_DAY * target_horizon * 100
 
     # 95% CI for the next-h-day move. The dominant source of uncertainty is the
     # stock's own realized volatility, NOT how much the agents disagree — so when

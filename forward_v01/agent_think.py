@@ -124,6 +124,21 @@ def _tsfm_block(ts: dict) -> str:
             f"mean {ts['mean_pct']:+.2f}%, 80% range [{ts['q10_pct']:+.2f}%, {ts['q90_pct']:+.2f}%].")
 
 
+def _market_block(ctx: dict) -> str:
+    """Broad-market context — shown to ALL agents because daily stock moves are
+    mostly market beta, which per-stock technicals can't see."""
+    m = ctx.get("market") or {}
+    parts = []
+    if m.get("spy_1d") is not None: parts.append(f"S&P500(SPY) {m['spy_1d']:+.1f}% today, 5d {m.get('spy_5d')}%")
+    if m.get("qqq_1d") is not None: parts.append(f"Nasdaq(QQQ) {m['qqq_1d']:+.1f}% today")
+    if m.get("vix") is not None: parts.append(f"VIX {m['vix']} ({m.get('vix_chg', 0):+.1f})")
+    line = ("Market backdrop: " + ", ".join(parts) + ".") if parts else ""
+    ed = ctx.get("earnings_in_days")
+    if ed is not None and 0 <= ed <= 4:
+        line += f"  ⚠ {ctx['ticker']} reports EARNINGS in ~{ed}d (expect an outsized move)."
+    return line
+
+
 def _news_block(headlines: list, rng, k: int) -> str:
     if not headlines:
         return "(no fresh headlines today)"
@@ -143,6 +158,9 @@ def build_user(persona: dict, ctx: dict) -> str:
         eff = 3
 
     lines = [f"As of {ctx['date']}, {ctx['ticker']} closed at ${ctx['t0_close']}."]
+    mb = _market_block(ctx)        # market backdrop + earnings — every tier sees it
+    if mb:
+        lines.append(mb)
     if eff >= 3:
         lines.append(_tech_block(ctx["indicators"], ctx["trend"]))
     if eff >= 4:

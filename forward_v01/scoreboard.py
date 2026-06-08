@@ -90,7 +90,22 @@ def build(rows: list[dict]) -> dict:
         "overall": overall, "per_ticker": per_ticker,
         "baseline": _baseline_stats(rows),
         "market": _model_stats(rows, "market_dir_correct", "market_abs_error_pct", "call-auction"),
+        "xs_crowd": _xs_stats(rows, "xs_crowd_dir_correct", "crowd"),
+        "xs_market": _xs_stats(rows, "xs_market_dir_correct", "market"),
     }
+
+
+def _xs_stats(rows: list[dict], flag: str, label: str) -> dict | None:
+    """Cross-sectional (market-neutral) direction hit-rate: did the ticker
+    out/under-perform the basket as predicted? Beta removed."""
+    sub = [r for r in rows if flag in r]
+    if not sub:
+        return None
+    n = len(sub)
+    hits = sum(1 for r in sub if r[flag])
+    lo, hi = wilson(hits, n)
+    return {"n": n, "hits": hits, "hit_rate": round(hits / n, 4),
+            "hit_ci95": [round(lo, 4), round(hi, 4)], "label": label}
 
 
 def _fmt(s: dict) -> str:
@@ -130,6 +145,13 @@ def main():
         print(f"BASELINE  n={bl['n']:<4} dir={bl['n']:<4} "
               f"hit={bl['hit_rate']*100:5.1f}% [{lo*100:4.1f},{hi*100:4.1f}]  "
               f"{'model='+bl['model']:<26} {'':5} MAE={bl['mae_pct']:.2f}%  ← non-LLM benchmark")
+    for key, tag in (("xs_crowd", "XS-CROWD"), ("xs_market", "XS-MKT")):
+        xs = sb.get(key)
+        if xs:
+            lo, hi = xs["hit_ci95"]
+            print(f"{tag:<9} n={xs['n']:<4} dir={xs['n']:<4} "
+                  f"hit={xs['hit_rate']*100:5.1f}% [{lo*100:4.1f},{hi*100:4.1f}]  "
+                  f"{'(market-neutral 相对强弱)':<26} {'':5}        ← #A-ii beta-removed")
     print("per ticker:")
     for t, s in sb["per_ticker"].items():
         print(f"  {t:<6} {_fmt(s)}")

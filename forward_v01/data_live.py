@@ -98,21 +98,80 @@ def latest_trading_date(ticker: str) -> str:
     return str(_live_prices(ticker).index[-1])
 
 
+# Evergreen "filler" headlines GDELT loves to surface — not next-day catalysts.
+_FILLER = ("invested in", "years ago would be worth", "worth this much",
+           "10 years ago", "$1,000 invested", "$100 invested", "if you'd bought",
+           "stock split", "is it too late", "better buy", "vs.", "magnificent seven",
+           "3 reasons", "5 stocks", "where will", "in 5 years", "by 2030", "millionaire")
+
+
+def _is_filler(title: str) -> bool:
+    t = title.lower()
+    return any(f in t for f in _FILLER)
+
+
 def headlines(ticker: str, date: str, n: int = 8, retries: int = 2) -> list[str]:
-    """News titles for `date`, robust to GDELT 429s. news_fetcher caches an
-    empty `[]` on any fetch error, which would permanently mask real news — so
-    we treat an empty result as suspect: drop the poisoned cache and retry with
-    backoff. A genuinely no-news day simply re-checks each run (cheap)."""
+    """Next-day-relevant news titles for `date`. Robust to GDELT 429s (an error
+    caches `[]` which would permanently mask real news → drop the poisoned cache
+    and retry). Filters out evergreen filler ("$100 invested 10 years ago…") so
+    agents reason on catalysts, not clickbait."""
     cache = news_fetcher.NEWS_CACHE / f"{ticker}_{date}.json"
     for attempt in range(retries + 1):
         arts = news_fetcher._fetch_day(ticker, date)
         if arts:
-            return [a["title"] for a in arts if a.get("title")][:n]
+            titles = [a["title"] for a in arts if a.get("title")]
+            real = [t for t in titles if not _is_filler(t)]
+            return (real or titles)[:n]   # fall back to raw if filter nukes everything
         if cache.exists():
             cache.unlink()  # don't let an error-empty result poison future runs
         if attempt < retries:
             time.sleep(2 * (attempt + 1))
     return []
+
+
+_MKT_MEMO: dict = {}
+
+
+def market_context(asof: str) -> dict:
+    """Broad-market backdrop every agent sees — daily stock returns are dominated
+    by market beta (every scored day so far moved all 5 tickers the same way), and
+    per-stock technicals can't see it. SPY/QQQ trend + VIX, STRICTLY <= asof (no
+    lookahead). Memoized per as-of date."""
+    if asof in _MKT_MEMO:
+        return _MKT_MEMO[asof]
+    d = pd.to_datetime(asof).date()
+    out = {}
+    for sym, key in (("SPY", "spy"), ("QQQ", "qqq"), ("^VIX", "vix")):
+        try:
+            c = _live_prices(sym)
+            c = c[c.index <= d]["close"]
+            if len(c) < 2:
+                continue
+            if sym == "^VIX":
+                out["vix"] = round(float(c.iloc[-1]), 1)
+                out["vix_chg"] = round(float(c.iloc[-1] - c.iloc[-2]), 1)
+            else:
+                out[f"{key}_1d"] = round((c.iloc[-1] / c.iloc[-2] - 1) * 100, 2)
+                out[f"{key}_5d"] = round((c.iloc[-1] / c.iloc[-6] - 1) * 100, 2) if len(c) > 6 else None
+        except Exception:
+            pass
+    _MKT_MEMO[asof] = out
+    return out
+
+
+def earnings_in_days(ticker: str, asof: str) -> int | None:
+    """Trading-ish days until the next earnings date (best-effort via yfinance).
+    Earnings days are huge-move days — agents should know. None if unavailable."""
+    try:
+        import yfinance as yf
+        cal = yf.Ticker(ticker).get_earnings_dates(limit=12)
+        d0 = pd.to_datetime(asof)
+        fut = [pd.Timestamp(x).tz_localize(None) for x in cal.index if pd.Timestamp(x).tz_localize(None) >= d0]
+        if fut:
+            return int((min(fut) - d0).days)
+    except Exception:
+        pass
+    return None
 
 
 def context(ticker: str, date: str, lookback: int = 60) -> dict:
@@ -147,6 +206,8 @@ def context(ticker: str, date: str, lookback: int = 60) -> dict:
         "news_headlines": head,
         "price_window": price_window,
         "fundamentals": fund,
+        "market": market_context(str(t0)),
+        "earnings_in_days": earnings_in_days(ticker, str(t0)),
     }
 
 
