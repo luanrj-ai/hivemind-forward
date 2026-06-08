@@ -100,5 +100,7 @@
     ],
     "mae_pct": 2.6511,
     "label": "call-auction"
-  }
+  },
+  "xs_crowd": null,
+  "xs_market": null
 }
