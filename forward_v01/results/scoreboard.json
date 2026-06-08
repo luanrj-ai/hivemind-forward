@@ -1,6 +1,6 @@
 {
   "overall": {
-    "n": 10,
+    "n": 15,
     "n_directional": 9,
     "hits": 5,
     "hit_rate": 0.5556,
@@ -9,12 +9,12 @@
       0.8112
     ],
     "coinflip_excluded": false,
-    "ci_calibration": 1.0,
-    "mae_pct": 1.8405
+    "ci_calibration": 0.9333,
+    "mae_pct": 2.1868
   },
   "per_ticker": {
     "AAPL": {
-      "n": 2,
+      "n": 3,
       "n_directional": 2,
       "hits": 1,
       "hit_rate": 0.5,
@@ -24,10 +24,10 @@
       ],
       "coinflip_excluded": false,
       "ci_calibration": 1.0,
-      "mae_pct": 0.819
+      "mae_pct": 0.9417
     },
     "AMZN": {
-      "n": 2,
+      "n": 3,
       "n_directional": 2,
       "hits": 2,
       "hit_rate": 1.0,
@@ -37,10 +37,10 @@
       ],
       "coinflip_excluded": false,
       "ci_calibration": 1.0,
-      "mae_pct": 1.805
+      "mae_pct": 2.2457
     },
     "GOOGL": {
-      "n": 2,
+      "n": 3,
       "n_directional": 2,
       "hits": 2,
       "hit_rate": 1.0,
@@ -50,10 +50,10 @@
       ],
       "coinflip_excluded": false,
       "ci_calibration": 1.0,
-      "mae_pct": 2.0455
+      "mae_pct": 1.715
     },
     "MSFT": {
-      "n": 2,
+      "n": 3,
       "n_directional": 1,
       "hits": 0,
       "hit_rate": 0.0,
@@ -63,10 +63,10 @@
       ],
       "coinflip_excluded": false,
       "ci_calibration": 1.0,
-      "mae_pct": 1.7015
+      "mae_pct": 2.0447
     },
     "NVDA": {
-      "n": 2,
+      "n": 3,
       "n_directional": 2,
       "hits": 0,
       "hit_rate": 0.0,
@@ -75,30 +75,30 @@
         0.6576
       ],
       "coinflip_excluded": false,
-      "ci_calibration": 1.0,
-      "mae_pct": 2.8315
+      "ci_calibration": 0.6667,
+      "mae_pct": 3.987
     }
   },
   "baseline": {
-    "n": 5,
-    "hits": 3,
-    "hit_rate": 0.6,
+    "n": 10,
+    "hits": 5,
+    "hit_rate": 0.5,
     "hit_ci95": [
-      0.2307,
-      0.8824
+      0.2366,
+      0.7634
     ],
-    "mae_pct": 1.4642,
+    "mae_pct": 2.1559,
     "model": "naive-drift-vol"
   },
   "market": {
-    "n": 5,
-    "hits": 4,
-    "hit_rate": 0.8,
+    "n": 10,
+    "hits": 5,
+    "hit_rate": 0.5,
     "hit_ci95": [
-      0.3755,
-      0.9638
+      0.2366,
+      0.7634
     ],
-    "mae_pct": 1.2222,
+    "mae_pct": 2.6511,
     "label": "call-auction"
   }
 }
