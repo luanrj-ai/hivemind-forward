@@ -21,10 +21,12 @@ LOG="forward_v01/results/logs/run_$(date +%Y%m%d_%H%M).log"
   echo "=== $(date) — forward_v01 daily START (repo: $REPO) ==="
   # Sync latest committed code/results before running (no-op on a clean clone).
   git pull --ff-only origin forward-predict 2>&1 || echo "WARN: git pull skipped/failed"
-  # caffeinate -i keeps the Mac awake for the duration of the (long) run.
-  # 150 agents × 5 tickers = 750 calls. Haiku ≈ 1/3 the quota cost of Sonnet, so
-  # 750 haiku calls sit comfortably inside one window (~2500 haiku-equivalent).
-  caffeinate -i "$REPO/.venv/bin/python" -m forward_v01.daily --agents 150 --model haiku
+  # caffeinate -i keeps the Mac awake for the duration of the run.
+  # 80 agents × 5 tickers = 400 calls. The claude subscription's ~5h rolling
+  # window empirically allows only ~470 calls (3 runs on 06-09 all capped there
+  # and dropped the last 2 tickers), so 750 doesn't fit but 400 completes all 5
+  # in ONE window — a complete, once-and-frozen daily prediction beats 150-on-3.
+  caffeinate -i "$REPO/.venv/bin/python" -m forward_v01.daily --agents 80 --model haiku
   echo "--- scoreboard ---"
   "$REPO/.venv/bin/python" -m forward_v01.scoreboard --json
   echo "--- rebuild viz data ---"
