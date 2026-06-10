@@ -1,20 +1,20 @@
 {
   "overall": {
-    "n": 20,
-    "n_directional": 11,
+    "n": 23,
+    "n_directional": 13,
     "hits": 7,
-    "hit_rate": 0.6364,
+    "hit_rate": 0.5385,
     "hit_ci95": [
-      0.3538,
-      0.8483
+      0.2914,
+      0.7679
     ],
     "coinflip_excluded": false,
-    "ci_calibration": 0.95,
-    "mae_pct": 1.9179
+    "ci_calibration": 0.913,
+    "mae_pct": 1.9745
   },
   "per_ticker": {
     "AAPL": {
-      "n": 4,
+      "n": 5,
       "n_directional": 3,
       "hits": 2,
       "hit_rate": 0.6667,
@@ -23,8 +23,8 @@
         0.9385
       ],
       "coinflip_excluded": false,
-      "ci_calibration": 1.0,
-      "mae_pct": 1.1025
+      "ci_calibration": 0.8,
+      "mae_pct": 1.6298
     },
     "AMZN": {
       "n": 4,
@@ -53,71 +53,71 @@
       "mae_pct": 1.6555
     },
     "MSFT": {
-      "n": 4,
-      "n_directional": 2,
+      "n": 5,
+      "n_directional": 3,
       "hits": 1,
-      "hit_rate": 0.5,
+      "hit_rate": 0.3333,
       "hit_ci95": [
-        0.0945,
-        0.9055
+        0.0615,
+        0.7923
       ],
       "coinflip_excluded": false,
       "ci_calibration": 1.0,
-      "mae_pct": 1.655
+      "mae_pct": 1.7608
     },
     "NVDA": {
-      "n": 4,
-      "n_directional": 2,
+      "n": 5,
+      "n_directional": 3,
       "hits": 0,
       "hit_rate": 0.0,
       "hit_ci95": [
         0.0,
-        0.6576
+        0.5615
       ],
       "coinflip_excluded": false,
-      "ci_calibration": 0.75,
-      "mae_pct": 3.4087
+      "ci_calibration": 0.8,
+      "mae_pct": 2.9538
     }
   },
   "baseline": {
-    "n": 15,
+    "n": 18,
     "hits": 7,
-    "hit_rate": 0.4667,
+    "hit_rate": 0.3889,
     "hit_ci95": [
-      0.2481,
-      0.6988
+      0.203,
+      0.6138
     ],
-    "mae_pct": 1.8599,
+    "mae_pct": 1.8772,
     "model": "naive-drift-vol"
   },
   "market": {
-    "n": 15,
+    "n": 18,
     "hits": 9,
-    "hit_rate": 0.6,
+    "hit_rate": 0.5,
     "hit_ci95": [
-      0.3575,
-      0.8018
+      0.2903,
+      0.7097
     ],
-    "mae_pct": 2.1962,
+    "mae_pct": 2.4696,
     "label": "call-auction"
   },
   "xs_crowd": {
-    "n": 2,
-    "hits": 1,
-    "hit_rate": 0.5,
+    "n": 5,
+    "hits": 3,
+    "hit_rate": 0.6,
     "hit_ci95": [
-      0.0945,
-      0.9055
+      0.2307,
+      0.8824
     ],
     "label": "crowd"
   },
   "xs_market": {
-    "n": 2,
-    "hits": 1,
-    "hit_rate": 0.5,
+    "n": 5,
+    "hits": 4,
+    "hit_rate": 0.8,
     "hit_ci95": [
-      0.0945,
-      0.9055
+      0.3755,
+      0.9638
     ],
     "label": "market"
   }
