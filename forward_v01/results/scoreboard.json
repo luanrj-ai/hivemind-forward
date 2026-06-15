@@ -1,58 +1,32 @@
 {
   "overall": {
-    "n": 33,
-    "n_directional": 23,
-    "hits": 12,
-    "hit_rate": 0.5217,
+    "n": 38,
+    "n_directional": 28,
+    "hits": 15,
+    "hit_rate": 0.5357,
     "hit_ci95": [
-      0.3296,
-      0.7076
+      0.3581,
+      0.7047
     ],
     "coinflip_excluded": false,
-    "ci_calibration": 0.9394,
-    "mae_pct": 1.8581
+    "ci_calibration": 0.9474,
+    "mae_pct": 1.7795
   },
   "per_ticker": {
     "AAPL": {
-      "n": 7,
-      "n_directional": 5,
+      "n": 8,
+      "n_directional": 6,
       "hits": 2,
-      "hit_rate": 0.4,
+      "hit_rate": 0.3333,
       "hit_ci95": [
-        0.1176,
-        0.7693
+        0.0968,
+        0.7
       ],
       "coinflip_excluded": false,
-      "ci_calibration": 0.8571,
-      "mae_pct": 1.5323
+      "ci_calibration": 0.875,
+      "mae_pct": 1.586
     },
     "AMZN": {
-      "n": 6,
-      "n_directional": 4,
-      "hits": 3,
-      "hit_rate": 0.75,
-      "hit_ci95": [
-        0.3006,
-        0.9544
-      ],
-      "coinflip_excluded": false,
-      "ci_calibration": 1.0,
-      "mae_pct": 1.837
-    },
-    "GOOGL": {
-      "n": 6,
-      "n_directional": 4,
-      "hits": 3,
-      "hit_rate": 0.75,
-      "hit_ci95": [
-        0.3006,
-        0.9544
-      ],
-      "coinflip_excluded": false,
-      "ci_calibration": 1.0,
-      "mae_pct": 1.4818
-    },
-    "MSFT": {
       "n": 7,
       "n_directional": 5,
       "hits": 3,
@@ -63,61 +37,87 @@
       ],
       "coinflip_excluded": false,
       "ci_calibration": 1.0,
-      "mae_pct": 1.5251
+      "mae_pct": 1.8707
     },
-    "NVDA": {
+    "GOOGL": {
       "n": 7,
       "n_directional": 5,
-      "hits": 1,
-      "hit_rate": 0.2,
+      "hits": 4,
+      "hit_rate": 0.8,
       "hit_ci95": [
-        0.0362,
-        0.6245
+        0.3755,
+        0.9638
       ],
       "coinflip_excluded": false,
-      "ci_calibration": 0.8571,
-      "mae_pct": 2.8574
+      "ci_calibration": 1.0,
+      "mae_pct": 1.3416
+    },
+    "MSFT": {
+      "n": 8,
+      "n_directional": 6,
+      "hits": 4,
+      "hit_rate": 0.6667,
+      "hit_ci95": [
+        0.3,
+        0.9032
+      ],
+      "coinflip_excluded": false,
+      "ci_calibration": 1.0,
+      "mae_pct": 1.4355
+    },
+    "NVDA": {
+      "n": 8,
+      "n_directional": 6,
+      "hits": 2,
+      "hit_rate": 0.3333,
+      "hit_ci95": [
+        0.0968,
+        0.7
+      ],
+      "coinflip_excluded": false,
+      "ci_calibration": 0.875,
+      "mae_pct": 2.6205
     }
   },
   "baseline": {
-    "n": 28,
-    "hits": 10,
-    "hit_rate": 0.3571,
+    "n": 33,
+    "hits": 11,
+    "hit_rate": 0.3333,
     "hit_ci95": [
-      0.2071,
-      0.5417
+      0.1975,
+      0.5039
     ],
-    "mae_pct": 1.8373,
+    "mae_pct": 1.6752,
     "model": "naive-drift-vol"
   },
   "market": {
-    "n": 28,
-    "hits": 17,
-    "hit_rate": 0.6071,
+    "n": 33,
+    "hits": 20,
+    "hit_rate": 0.6061,
     "hit_ci95": [
-      0.4241,
-      0.7643
+      0.4368,
+      0.7532
     ],
-    "mae_pct": 1.9574,
+    "mae_pct": 2.0358,
     "label": "call-auction"
   },
   "xs_crowd": {
-    "n": 15,
-    "hits": 7,
-    "hit_rate": 0.4667,
+    "n": 20,
+    "hits": 10,
+    "hit_rate": 0.5,
     "hit_ci95": [
-      0.2481,
-      0.6988
+      0.2993,
+      0.7007
     ],
     "label": "crowd"
   },
   "xs_market": {
-    "n": 15,
-    "hits": 10,
-    "hit_rate": 0.6667,
+    "n": 20,
+    "hits": 14,
+    "hit_rate": 0.7,
     "hit_ci95": [
-      0.4171,
-      0.8482
+      0.481,
+      0.8545
     ],
     "label": "market"
   }
