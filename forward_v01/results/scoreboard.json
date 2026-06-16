@@ -1,16 +1,16 @@
 {
   "overall": {
-    "n": 38,
-    "n_directional": 28,
-    "hits": 15,
-    "hit_rate": 0.5357,
+    "n": 40,
+    "n_directional": 30,
+    "hits": 17,
+    "hit_rate": 0.5667,
     "hit_ci95": [
-      0.3581,
-      0.7047
+      0.392,
+      0.7262
     ],
     "coinflip_excluded": false,
-    "ci_calibration": 0.9474,
-    "mae_pct": 1.7795
+    "ci_calibration": 0.95,
+    "mae_pct": 1.7917
   },
   "per_ticker": {
     "AAPL": {
@@ -27,30 +27,30 @@
       "mae_pct": 1.586
     },
     "AMZN": {
-      "n": 7,
-      "n_directional": 5,
-      "hits": 3,
-      "hit_rate": 0.6,
+      "n": 8,
+      "n_directional": 6,
+      "hits": 4,
+      "hit_rate": 0.6667,
       "hit_ci95": [
-        0.2307,
-        0.8824
+        0.3,
+        0.9032
       ],
       "coinflip_excluded": false,
       "ci_calibration": 1.0,
-      "mae_pct": 1.8707
+      "mae_pct": 1.9279
     },
     "GOOGL": {
-      "n": 7,
-      "n_directional": 5,
-      "hits": 4,
-      "hit_rate": 0.8,
+      "n": 8,
+      "n_directional": 6,
+      "hits": 5,
+      "hit_rate": 0.8333,
       "hit_ci95": [
-        0.3755,
-        0.9638
+        0.4365,
+        0.9699
       ],
       "coinflip_excluded": false,
       "ci_calibration": 1.0,
-      "mae_pct": 1.3416
+      "mae_pct": 1.3889
     },
     "MSFT": {
       "n": 8,
@@ -80,44 +80,44 @@
     }
   },
   "baseline": {
-    "n": 33,
+    "n": 35,
     "hits": 11,
-    "hit_rate": 0.3333,
+    "hit_rate": 0.3143,
     "hit_ci95": [
-      0.1975,
-      0.5039
+      0.1855,
+      0.4798
     ],
-    "mae_pct": 1.6752,
+    "mae_pct": 1.7612,
     "model": "naive-drift-vol"
   },
   "market": {
-    "n": 33,
-    "hits": 20,
-    "hit_rate": 0.6061,
+    "n": 35,
+    "hits": 22,
+    "hit_rate": 0.6286,
     "hit_ci95": [
-      0.4368,
-      0.7532
+      0.4634,
+      0.7683
     ],
-    "mae_pct": 2.0358,
+    "mae_pct": 1.9548,
     "label": "call-auction"
   },
   "xs_crowd": {
-    "n": 20,
+    "n": 22,
     "hits": 10,
-    "hit_rate": 0.5,
+    "hit_rate": 0.4545,
     "hit_ci95": [
-      0.2993,
-      0.7007
+      0.2692,
+      0.6534
     ],
     "label": "crowd"
   },
   "xs_market": {
-    "n": 20,
-    "hits": 14,
-    "hit_rate": 0.7,
+    "n": 22,
+    "hits": 15,
+    "hit_rate": 0.6818,
     "hit_ci95": [
-      0.481,
-      0.8545
+      0.4732,
+      0.8364
     ],
     "label": "market"
   }
