@@ -1,16 +1,16 @@
 {
   "overall": {
-    "n": 96,
-    "n_directional": 77,
-    "hits": 43,
-    "hit_rate": 0.5584,
+    "n": 97,
+    "n_directional": 78,
+    "hits": 44,
+    "hit_rate": 0.5641,
     "hit_ci95": [
-      0.4474,
-      0.6639
+      0.4536,
+      0.6686
     ],
     "coinflip_excluded": false,
-    "ci_calibration": 0.9271,
-    "mae_pct": 1.7726
+    "ci_calibration": 0.9278,
+    "mae_pct": 1.7574
   },
   "per_ticker": {
     "AAPL": {
@@ -27,17 +27,17 @@
       "mae_pct": 1.3721
     },
     "AMZN": {
-      "n": 19,
-      "n_directional": 14,
-      "hits": 6,
-      "hit_rate": 0.4286,
+      "n": 20,
+      "n_directional": 15,
+      "hits": 7,
+      "hit_rate": 0.4667,
       "hit_ci95": [
-        0.2138,
-        0.6741
+        0.2481,
+        0.6988
       ],
       "coinflip_excluded": false,
-      "ci_calibration": 0.9474,
-      "mae_pct": 2.0628
+      "ci_calibration": 0.95,
+      "mae_pct": 1.9747
     },
     "GOOGL": {
       "n": 19,
@@ -80,25 +80,25 @@
     }
   },
   "baseline": {
-    "n": 91,
+    "n": 92,
     "hits": 37,
-    "hit_rate": 0.4066,
+    "hit_rate": 0.4022,
     "hit_ci95": [
-      0.3114,
-      0.5093
+      0.3078,
+      0.5043
     ],
-    "mae_pct": 1.7425,
+    "mae_pct": 1.7316,
     "model": "naive-drift-vol"
   },
   "market": {
-    "n": 91,
+    "n": 92,
     "hits": 47,
-    "hit_rate": 0.5165,
+    "hit_rate": 0.5109,
     "hit_ci95": [
-      0.4152,
-      0.6164
+      0.4104,
+      0.6105
     ],
-    "mae_pct": 2.3337,
+    "mae_pct": 2.3329,
     "label": "call-auction"
   },
   "xs_crowd": {
